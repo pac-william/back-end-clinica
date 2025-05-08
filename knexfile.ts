@@ -1,13 +1,16 @@
 import type { Knex } from 'knex';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const config: { [key: string]: Knex.Config } = {
   development: {
     client: 'pg',
     connection: {
-      host: 'localhost',
-      user: 'seu_usuario',
-      password: 'sua_senha',
-      database: 'seu_banco',
+      host: process.env.POSTGRES_HOST,
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
     },
     migrations: {
       directory: './src/database/migrations',
