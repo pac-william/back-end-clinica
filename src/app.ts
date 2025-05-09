@@ -1,13 +1,12 @@
 import express from 'express';
-import cors from 'cors';
-import 'dotenv/config'
-import router from './router/api';
-
+import pacienteRoutes from './routes/pacienteRoutes';
 
 const app = express();
-
-app.use(cors());
 app.use(express.json());
-app.use('/api', router);
 
-export default app;
+app.use('/api', pacienteRoutes);
+
+const PORT = 8080;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
