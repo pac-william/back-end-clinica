@@ -1,9 +1,12 @@
-import { Router } from "express";
+import express from "express";
+import patientRoutes from '../routes/pacienteRoutes';
 
-const router = Router();
+const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.json({ message: 'API rodando com sucess 🚀' });
+    res.redirect('/api/v1/swagger-ui')
 });
+
+router.use('/api/v1/patients', patientRoutes);
 
 export default router;
