@@ -17,7 +17,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@types/express": "^5.0.1",
     "backend-clinica": "file:",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -29,8 +28,9 @@
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.1",
     "@types/knex": "^0.15.2",
-    "@types/node": "^20.14.12",
+    "@types/node": "^20.17.46",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "ts-node": "^10.9.2",

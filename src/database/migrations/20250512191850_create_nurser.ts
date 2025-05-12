@@ -1,0 +1,24 @@
+import type { Knex } from "knex";
+
+
+export async function up(knex: Knex): Promise<void> {
+    return knex.schema.createTable('nurses', (table) => {
+      table.increments('id').primary();
+      table.string('name').notNullable();
+      table.string('coren').notNullable().unique()
+      table
+        .integer('specialty_id')
+        .unsigned()
+        .references('id')
+        .inTable('specialties')
+        .onDelete('SET NULL');
+      table.string('department').notNullable();
+      table.string('phone').notNullable();
+      table.string('cpf').notNullable().unique();
+      table.timestamps(true, true); 
+    });
+  }
+  
+  export async function down(knex: Knex): Promise<void> {
+    return knex.schema.dropTableIfExists('nurses');
+  }
