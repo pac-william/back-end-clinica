@@ -9,7 +9,8 @@
     "migrate": "knex --knexfile src/database/knexfile.ts migrate:latest",
     "create:migrate": "npx knex --knexfile knexfile.ts migrate:make",
     "migrate:rollback": "knex --knexfile src/database/knexfile.ts migrate:rollback",
-    "seed": "knex --knexfile src/database/knexfile.ts seed:run"
+    "seed": "knex --knexfile src/database/knexfile.ts seed:run",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
