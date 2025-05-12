@@ -1,8 +1,10 @@
 import express from 'express';
 import DoctorController from '../controllers/doctorController';
+import DoctorService from '../services/doctorService';
 
 const router = express.Router();
-const doctorController = new DoctorController();
+const doctorService = new DoctorService();
+const doctorController = new DoctorController(doctorService);
 
 /**
  * @swagger
