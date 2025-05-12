@@ -13,7 +13,6 @@ class DoctorController {
       const doctors = await this.doctorService.getAllDoctors();
       res.json(doctors);
     } catch (error: any) {
-      console.log(error);
       res.status(500).json({ error });
     }
   };

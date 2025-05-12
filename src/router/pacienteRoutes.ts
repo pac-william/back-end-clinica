@@ -1,8 +1,10 @@
 import express from 'express';
-import PatientController from '../controllers/pacienteController';
+import PatientController from '../controllers/pacientController';
+import PatientService from '../services/PatientService';
 
 const router = express.Router();
-const patientController = new PatientController();
+const patientService = new PatientService();
+const patientController = new PatientController(patientService);
 
 /**
  * @swagger

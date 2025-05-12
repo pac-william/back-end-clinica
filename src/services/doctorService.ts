@@ -1,6 +1,7 @@
 import db from '../database/connection';
 
 class DoctorService {
+  
   async getAllDoctors() {
     return await db('doctors').select('*');
   }
