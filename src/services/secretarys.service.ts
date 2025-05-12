@@ -18,8 +18,8 @@ class SecretaryService {
         return nurser;
     }
 
-    async create(name: string, email: string, phone: string) {
-        const nurser = await db('secretarys').insert({ name, email, phone });
+    async create(secretary: Secretary) {
+        const [nurser] = await db('secretarys').insert(secretary).returning('*');
         return nurser;
     }
 

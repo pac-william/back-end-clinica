@@ -3,6 +3,7 @@ import { Request, RequestHandler, Response } from 'express';
 import { secretarySchema } from '../schemas/secretary.schema';
 import NursesService from 'services/secretarys.service';
 import { ZodError } from 'zod';
+import { Secretary } from 'models/secretary';
 
 class SecretaryController {
     private secretaryService: NursesService;
@@ -13,8 +14,10 @@ class SecretaryController {
 
     create: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
-            const validation = secretarySchema.parse(req.body);
-            res.status(201).json(validation);
+            const secretaryBody = secretarySchema.parse(req.body) as Secretary;
+            const response = await this.secretaryService.create(secretaryBody);
+            res.status(200).json(response);
+            return;
         } catch (err) {
             if (err instanceof ZodError) {
                 res.status(400).json({
@@ -26,17 +29,17 @@ class SecretaryController {
                     errors: err
                 });
             }
-          }
-      };
+        }
+    };
 
     getAll: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
-    
+
         try {
             const { data, total } = await this.secretaryService.getAll(page, limit);
             const totalPages = Math.ceil(total / limit);
-    
+
             if (page > totalPages && totalPages > 0) {
                 const correctedPage = totalPages;
                 const correctedData = await this.secretaryService.getAll(correctedPage, limit);
@@ -50,7 +53,7 @@ class SecretaryController {
                     },
                 });
             }
-    
+
             res.json({
                 data,
                 meta: {

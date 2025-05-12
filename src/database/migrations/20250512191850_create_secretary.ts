@@ -5,13 +5,13 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable('secretarys', (table) => {
       table.increments('id').primary();
       table.string('name').notNullable();
-      table.string('department').notNullable();
-      table.string('phone').notNullable();
-      table.string('cpf').notNullable().unique();
-      table.timestamps(true, true); 
+      table.string('department').nullable();
+      table.string('phone').nullable();
+      table.string('cpf').nullable().unique();
+      table.timestamps(true, true);
     });
   }
   
   export async function down(knex: Knex): Promise<void> {
-    return knex.schema.dropTableIfExists('secretary');
+    return knex.schema.dropTableIfExists('secretarys');
   }
