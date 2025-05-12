@@ -1,7 +1,7 @@
 import express from 'express';
 import doctorRoutes from './doctorRoutes';
 import patientRoutes from './pacienteRoutes';
-import nurseRoutes from './nurser.router'
+import secretaryRoutes from './secretary.router'
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
 });
 
 router.use('/api/v1/patients', patientRoutes);
-router.use('/api/v1/nursers', nurseRoutes);
+router.use('/api/v1/secretary', secretaryRoutes);
 router.use('/api/v1/doctors', doctorRoutes);
 
 export default router;

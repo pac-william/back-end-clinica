@@ -12,6 +12,7 @@ app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/v1/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.use(express.json()); 
 app.use('/', routes);
 
 app.use((req, res) => {
