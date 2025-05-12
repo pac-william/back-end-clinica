@@ -7,11 +7,14 @@ services:
       dockerfile: Dockerfile
     container_name: backend-clinica
     environment:
-      - NODE_ENV=development
-      - DB_HOST=db
-      - DB_USER=your_user
-      - DB_PASSWORD=your_password
-      - DB_NAME=your_database
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - POSTGRES_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PORT=${PORT}
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     depends_on:
@@ -26,7 +29,7 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=root
+      - POSTGRES_DB=clinica
     ports:
       - "5432:5432"
     volumes:
