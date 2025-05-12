@@ -2,7 +2,9 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import routes from './router/api';
 import swaggerSpec from './swagger';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const app = express();
 app.use(express.json());
 
@@ -12,7 +14,7 @@ app.use('/api/v1/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(routes);
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`http://localhost:${PORT}/api-docs`);
     console.log(`http://localhost:${PORT}`);
