@@ -1,22 +1,28 @@
 
 import { Request, RequestHandler, Response } from 'express';
 import { secretarySchema } from '../schemas/secretary.schema';
-import NursesService from 'services/secretarys.service';
+import SecretaryService from 'services/secretarys.service';
 import { ZodError } from 'zod';
 import { Secretary } from 'models/secretary';
 
 class SecretaryController {
-    private secretaryService: NursesService;
+    private secretaryService: SecretaryService;
 
-    constructor(secretaryService: NursesService) {
+    constructor(secretaryService: SecretaryService) {
         this.secretaryService = secretaryService;
     }
 
     create: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
             const secretaryBody = secretarySchema.parse(req.body) as Secretary;
-            const response = await this.secretaryService.create(secretaryBody);
-            res.status(200).json(response);
+            const secretary = await this.secretaryService.create(secretaryBody);
+            
+            if(!secretary?.success) {
+                res.status(400).json(secretary);
+                return;
+            }
+
+            res.status(200).json(secretary);
             return;
         } catch (err) {
             if (err instanceof ZodError) {

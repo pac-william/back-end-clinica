@@ -1,7 +1,7 @@
 import db from '../database/connection';
 
 class DoctorService {
-  
+
   async getAllDoctors() {
     return await db('doctors').select('*');
   }
@@ -10,15 +10,35 @@ class DoctorService {
     return await db('doctors').where('id', id).first();
   }
 
-  async createDoctor(name: string, crm: string, specialty: string, phone: string, email: string) {
-    const [id] = await db('doctors').insert({
+  async createDoctor(name: string, crm: string, specialty: string, phone: string, email: string): Promise<any> {
+
+    const existing = await db('doctors')
+      .where('crm', crm)
+      .orWhere('email', email)
+      .first();
+
+    if (existing) {
+      const erros: Record<string, string[]> = {};
+      if (existing.crm === crm) erros.crm = ['CRM já cadastrado'];
+      if (existing.email === email) erros.email = ['Email já cadastrado'];
+      return {
+        success: false,
+        dados: erros,
+      };
+    }
+
+    const doctor = await db('doctors').insert({
       name,
       crm,
       specialty,
       phone,
       email,
-    });
-    return await this.getDoctorById(id.toString());
+    }).returning('*');
+
+    return {
+      success: true,
+      dados: doctor,
+    };
   }
 
   async updateDoctor(id: string, name: string, crm: string, specialty: string, phone: string, email: string) {
