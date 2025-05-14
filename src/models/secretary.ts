@@ -5,4 +5,5 @@ export interface Secretary {
   department: string;
   phone: string;
   cpf: string;
+  doctor_id: number;
 }
