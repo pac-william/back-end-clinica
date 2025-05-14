@@ -19,7 +19,6 @@ class SecretaryService {
     }
 
     async create(secretary: Secretary) {
-
         const doctorService = new DoctorService();
         const doctor = await doctorService.getDoctorById(String(secretary.doctor_id));
 

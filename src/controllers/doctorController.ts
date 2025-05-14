@@ -34,7 +34,6 @@ class DoctorController {
       doctorSchema.parse(req.body);
       const { name, crm, specialty, phone, email} = req.body;
       const doctor = await this.doctorService.createDoctor(name, crm, specialty, phone, email);
-      console.log(doctor);
       if(!doctor?.success) {
           res.status(400).json(doctor);
           return;
