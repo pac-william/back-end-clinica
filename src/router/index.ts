@@ -1,6 +1,6 @@
 import express from 'express';
 import doctorRoutes from './doctorRoutes';
-import patientRoutes from './pacienteRoutes';
+import patientRoutes from './patientRoutes';
 import secretaryRoutes from './secretaryRouter';
 import userRoutes from './userRoutes';
 const router = express.Router();
