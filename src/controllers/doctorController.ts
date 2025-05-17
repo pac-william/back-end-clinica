@@ -1,21 +1,14 @@
 import { Request, RequestHandler, Response } from 'express';
-import DoctorService from '../services/doctorService';
-import UserService from '../services/userService';
-import { doctorSchema } from '../schemas/doctor.schema';
 import { ZodError } from 'zod';
+import { doctorSchema } from '../schemas/doctor.schema';
+import DoctorService from '../services/doctorService';
+
+const doctorService = new DoctorService();
 
 class DoctorController {
-  private doctorService: DoctorService;
-  private userService: UserService; 
-
-  constructor(doctorService: DoctorService,userService: UserService) {
-    this.doctorService = doctorService;
-    this.userService = userService;
-  }
-
   getAllDoctors: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const doctors = await this.doctorService.getAllDoctors();
+      const doctors = await doctorService.getAllDoctors();
       res.json(doctors);
     } catch (error: any) {
       res.status(500).json({ error });
@@ -24,9 +17,9 @@ class DoctorController {
 
   getDoctorById: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const doctor = await this.doctorService.getDoctorById(id);
+    const doctor = await doctorService.getDoctorById(id);
     if (!doctor) {
-      res.status(404).json({ error: 'Médico não encontrado' });
+      res.status(404).json({ error: 'Doctor not found' });
       return;
     }
     res.json(doctor);
@@ -35,22 +28,17 @@ class DoctorController {
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
       doctorSchema.parse(req.body);
-      const { name, crm, specialty, phone, email, login, senha} = req.body;
-      
-      const doctor = await this.doctorService.createDoctor(name, crm, specialty, phone, email);
+      const { name, crm, specialty, phone, email } = req.body;
 
-      if(!doctor?.success) {
-          res.status(400).json(doctor);
-          return;
+      const doctor = await doctorService.createDoctor(name, crm, specialty, phone, email);
+
+      if (!doctor?.success) {
+        res.status(400).json(doctor);
+        return;
       }
 
-      const doctorId = doctor.data.id;
-
-      const user = await this.userService.createUser({login,senha,role:'DOCTOR',role_id: doctorId});
-
       res.status(201).json({
-        doctor: doctor.dados,
-        user: user.dados
+        doctor: doctor.data
       });
 
       return;
@@ -71,9 +59,9 @@ class DoctorController {
   updateDoctor: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, crm, specialty, phone, email } = req.body;
-    const doctor = await this.doctorService.updateDoctor(id, name, crm, specialty, phone, email);
+    const doctor = await doctorService.updateDoctor(id, name, crm, specialty, phone, email);
     if (!doctor) {
-      res.status(404).json({ error: 'Médico não encontrado' });
+      res.status(404).json({ error: 'Doctor not found' });
       return;
     }
     res.json(doctor);
@@ -81,12 +69,12 @@ class DoctorController {
 
   deleteDoctor: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await this.doctorService.deleteDoctor(id);
+    const result = await doctorService.deleteDoctor(id);
     if (!result.id) {
-      res.status(404).json({ error: 'Médico não encontrado' });
+      res.status(404).json({ error: 'Doctor not found' });
       return;
     }
-    res.json({ message: 'Médico removido' });
+    res.json({ message: 'Doctor deleted successfully' });
   };
 }
 

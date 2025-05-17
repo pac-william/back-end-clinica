@@ -18,12 +18,12 @@ class DoctorService {
       .first();
 
     if (existing) {
-      const erros: Record<string, string[]> = {};
-      if (existing.crm === crm) erros.crm = ['CRM já cadastrado'];
-      if (existing.email === email) erros.email = ['Email já cadastrado'];
+      const errors: Record<string, string[]> = {};
+      if (existing.crm === crm) errors.crm = ['CRM already registered'];
+      if (existing.email === email) errors.email = ['Email already registered'];
       return {
         success: false,
-        dados: erros,
+        data: errors,
       };
     }
 
@@ -37,7 +37,7 @@ class DoctorService {
 
     return {
       success: true,
-      dados: doctor,
+      data: doctor,
     };
   }
 
