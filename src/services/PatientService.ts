@@ -12,7 +12,8 @@ class PatientService {
     }
 
     async createPatient(name: string, email: string, phone: string) {
-        const patient = await db('patients').insert({ name, email, phone });
+        const [patient] = await db('patients').insert({ name, email, phone }).returning('*');   
+
         return patient;
     }
 

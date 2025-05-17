@@ -1,9 +1,12 @@
 import express from 'express';
 import NursesService from '../services/secretarys.service';
 import NursesController from '../controllers/secretary.controller';
+import UserService from '../services/userService';
+
 const router = express.Router();
 const secretaryService = new NursesService();
-const secretaryController = new NursesController(secretaryService);
+const userService = new UserService();
+const secretaryController = new NursesController(secretaryService,userService);
 
 router.get('/', secretaryController.getAll);
 router.post('/', secretaryController.create);

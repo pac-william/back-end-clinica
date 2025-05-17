@@ -1,13 +1,16 @@
 import { Request, RequestHandler, Response } from 'express';
 import DoctorService from '../services/doctorService';
+import UserService from '../services/userService';
 import { doctorSchema } from '../schemas/doctor.schema';
 import { ZodError } from 'zod';
 
 class DoctorController {
   private doctorService: DoctorService;
+  private userService: UserService; 
 
-  constructor(doctorService: DoctorService) {
+  constructor(doctorService: DoctorService,userService: UserService) {
     this.doctorService = doctorService;
+    this.userService = userService;
   }
 
   getAllDoctors: RequestHandler = async (req: Request, res: Response) => {
@@ -32,14 +35,24 @@ class DoctorController {
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
       doctorSchema.parse(req.body);
-      const { name, crm, specialty, phone, email} = req.body;
+      const { name, crm, specialty, phone, email, login, senha} = req.body;
+      
       const doctor = await this.doctorService.createDoctor(name, crm, specialty, phone, email);
+
       if(!doctor?.success) {
           res.status(400).json(doctor);
           return;
       }
 
-      res.status(201).json(doctor);
+      const doctorId = doctor.data.id;
+
+      const user = await this.userService.createUser({login,senha,role:'DOCTOR',role_id: doctorId});
+
+      res.status(201).json({
+        doctor: doctor.dados,
+        user: user.dados
+      });
+
       return;
     } catch (err) {
       if (err instanceof ZodError) {

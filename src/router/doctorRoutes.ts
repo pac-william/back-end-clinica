@@ -1,10 +1,12 @@
 import express from 'express';
 import DoctorController from '../controllers/doctorController';
 import DoctorService from '../services/doctorService';
+import UserService from '../services/userService';
 
 const router = express.Router();
 const doctorService = new DoctorService();
-const doctorController = new DoctorController(doctorService);
+const userService = new UserService();
+const doctorController = new DoctorController(doctorService,userService);
 
 /**
  * @swagger
@@ -92,21 +94,70 @@ router.get('/:id', doctorController.getDoctorById);
  * @swagger
  * /api/v1/doctors:
  *   post:
- *     summary: Cria um novo médico
+ *     summary: Cria um novo médico e usuário associado
  *     tags: [Doctors]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Doctor'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Dr. Carlos Souza
+ *               crm:
+ *                 type: string
+ *                 example: "123456"
+ *               specialty:
+ *                 type: string
+ *                 example: Cardiologia
+ *               phone:
+ *                 type: string
+ *                 example: "+55 31 98765-4321"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: carlos@email.com
+ *               login:
+ *                 type: string
+ *                 example: drcarlos
+ *               senha:
+ *                 type: string
+ *                 example: senhaSegura123
+ *             required:
+ *               - name
+ *               - crm
+ *               - specialty
+ *               - phone
+ *               - email
+ *               - login
+ *               - senha
  *     responses:
  *       201:
- *         description: Médico criado com sucesso
+ *         description: Médico e usuário criados com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Doctor'
+ *               type: object
+ *               properties:
+ *                 doctor:
+ *                   $ref: '#/components/schemas/Doctor'
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     login:
+ *                       type: string
+ *                       example: drcarlos
+ *                     role:
+ *                       type: string
+ *                       example: DOCTOR
+ *                     role_id:
+ *                       type: integer
+ *                       example: 1
  *       400:
  *         description: Dados inválidos
  */

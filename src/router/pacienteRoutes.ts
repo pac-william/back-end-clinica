@@ -1,10 +1,12 @@
 import express from 'express';
 import PatientController from '../controllers/pacientController';
 import PatientService from '../services/PatientService';
+import UserService from '../services/userService';
 
 const router = express.Router();
 const patientService = new PatientService();
-const patientController = new PatientController(patientService);
+const userService = new UserService();
+const patientController = new PatientController(patientService,userService);
 
 /**
  * @swagger
@@ -84,21 +86,62 @@ router.get('/:id', patientController.getPatientById);
  * @swagger
  * /api/v1/patients:
  *   post:
- *     summary: Cria um novo paciente
+ *     summary: Cria um novo paciente e usuário associado
  *     tags: [Pacientes]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Paciente'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: João Silva
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: joao@email.com
+ *               phone:
+ *                 type: string
+ *                 example: "+55 31 99999-9999"
+ *               login:
+ *                 type: string
+ *                 example: joaosilva
+ *               senha:
+ *                 type: string
+ *                 example: senha123
+ *             required:
+ *               - name
+ *               - email
+ *               - phone
+ *               - login
+ *               - senha
  *     responses:
  *       201:
- *         description: Paciente criado com sucesso
+ *         description: Paciente e usuário criados com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Paciente'
+ *               type: object
+ *               properties:
+ *                 patient:
+ *                   $ref: '#/components/schemas/Paciente'
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     login:
+ *                       type: string
+ *                       example: joaosilva
+ *                     role:
+ *                       type: string
+ *                       example: PATIENT
+ *                     role_id:
+ *                       type: integer
+ *                       example: 1
  *       400:
  *         description: Dados inválidos
  */
