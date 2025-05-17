@@ -41,6 +41,8 @@ const patientController = new PatientController();
  *   get:
  *     summary: Retorna todos os pacientes
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -96,6 +98,10 @@ const patientController = new PatientController();
  *                     totalPages:
  *                       type: integer
  *                       description: Total de páginas
+ *       401:
+ *         description: Não autorizado
+ *       403:
+ *         description: Acesso proibido
  */
 router.get('/', patientController.getAllPatients);
 
@@ -105,6 +111,8 @@ router.get('/', patientController.getAllPatients);
  *   get:
  *     summary: Retorna um paciente pelo ID
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -121,6 +129,8 @@ router.get('/', patientController.getAllPatients);
  *               $ref: '#/components/schemas/Paciente'
  *       404:
  *         description: Paciente não encontrado
+ *       401:
+ *         description: Não autorizado
  */
 router.get('/:id', patientController.getPatientById);
 
@@ -130,6 +140,8 @@ router.get('/:id', patientController.getPatientById);
  *   post:
  *     summary: Cria um novo paciente e usuário associado
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -186,6 +198,8 @@ router.get('/:id', patientController.getPatientById);
  *                       example: 1
  *       400:
  *         description: Dados inválidos
+ *       401:
+ *         description: Não autorizado
  */
 router.post('/', patientController.createPatient);
 
@@ -195,6 +209,8 @@ router.post('/', patientController.createPatient);
  *   put:
  *     summary: Atualiza um paciente
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -213,6 +229,8 @@ router.post('/', patientController.createPatient);
  *         description: Paciente atualizado com sucesso
  *       404:
  *         description: Paciente não encontrado
+ *       401:
+ *         description: Não autorizado
  */
 router.put('/:id', patientController.updatePatient);
 
@@ -222,6 +240,8 @@ router.put('/:id', patientController.updatePatient);
  *   delete:
  *     summary: Remove um paciente
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -234,6 +254,8 @@ router.put('/:id', patientController.updatePatient);
  *         description: Paciente removido com sucesso
  *       404:
  *         description: Paciente não encontrado
+ *       401:
+ *         description: Não autorizado
  */
 router.delete('/:id', patientController.deletePatient);
 

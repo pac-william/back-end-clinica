@@ -1,7 +1,11 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import db from '../database/connection';
 import { loginSchema, userSchema } from '../schemas/user.schema';
+
+const SECRET_KEY = process.env.JWT_SECRET || 'sua_chave_secreta_padrao';
+const TOKEN_EXPIRATION = '1d'; // Token expira em 1 dia
 
 class UserService {
   async getAllUsers(page: number = 1, limit: number = 10, email?: string, role?: string) {
@@ -85,9 +89,30 @@ class UserService {
       };
     }
 
+    // Gerar token JWT
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      },
+      SECRET_KEY,
+      {
+        expiresIn: TOKEN_EXPIRATION
+      }
+    );
+
     return {
       success: true,
-      data: user,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          role_id: user.role_id
+        },
+        token
+      },
     };
   }
 }
