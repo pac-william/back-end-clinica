@@ -8,7 +8,12 @@ const doctorService = new DoctorService();
 class DoctorController {
   getAllDoctors: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const doctors = await doctorService.getAllDoctors();
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const specialty = req.query.specialty as string | undefined;
+      const name = req.query.name as string | undefined;
+
+      const doctors = await doctorService.getAllDoctors(page, limit, specialty, name);
       res.json(doctors);
     } catch (error: any) {
       res.status(500).json({ error });

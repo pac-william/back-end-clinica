@@ -49,15 +49,56 @@ const doctorController = new DoctorController();
  *   get:
  *     summary: Retorna todos os médicos
  *     tags: [Doctors]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número da página para paginação
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Número de itens por página
+ *       - in: query
+ *         name: specialty
+ *         schema:
+ *           type: string
+ *         description: Filtrar médicos por especialidade
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filtrar médicos por nome
  *     responses:
  *       200:
  *         description: Lista de médicos
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Doctor'
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Doctor'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       description: Total de registros
+ *                     page:
+ *                       type: integer
+ *                       description: Página atual
+ *                     limit:
+ *                       type: integer
+ *                       description: Itens por página
+ *                     totalPages:
+ *                       type: integer
+ *                       description: Total de páginas
  */
 router.get('/', doctorController.getAllDoctors);
 
