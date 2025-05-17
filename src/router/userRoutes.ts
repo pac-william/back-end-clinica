@@ -6,7 +6,75 @@ const userController = new UserController();
 
 /**
  * @swagger
- * /api/users/create:
+ * /api/v1/users:
+ *   get:
+ *     summary: Retorna todos os usuários
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número da página para paginação
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Número de itens por página
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         description: Filtrar usuários por email (ignora acentuação e maiúsculas/minúsculas)
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *         description: Filtrar usuários por função (DOCTOR, SECRETARY, PATIENT)
+ *     responses:
+ *       200:
+ *         description: Lista de usuários
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       email:
+ *                         type: string
+ *                       role:
+ *                         type: string
+ *                       role_id:
+ *                         type: integer
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       description: Total de registros
+ *                     page:
+ *                       type: integer
+ *                       description: Página atual
+ *                     limit:
+ *                       type: integer
+ *                       description: Itens por página
+ *                     totalPages:
+ *                       type: integer
+ *                       description: Total de páginas
+ */
+router.get('/', userController.getAllUsers);
+
+/**
+ * @swagger
+ * /api/v1/users/create:
  *   post:
  *     summary: Cria um novo usuário
  *     tags: [Usuários]
@@ -59,7 +127,7 @@ router.post('/create', userController.createUser);
 
 /**
  * @swagger
- * /api/users/login:
+ * /api/v1/users/login:
  *   post:
  *     summary: Realiza login do usuário
  *     tags: [Usuários]
