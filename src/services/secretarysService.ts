@@ -3,14 +3,37 @@ import db from '../database/connection';
 import DoctorService from './doctorService';
 
 class SecretaryService {
-    async getAll(page: number = 0, limit: number = 10): Promise<{ data: Secretary[]; total: number }> {
+    async getAllSecretaries(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string): Promise<{ data: Secretary[]; meta: { total: number, page: number, limit: number, totalPages: number } }> {
         const offset = (page - 1) * limit;
+        
+        let query = db('secretarys');
+        
+        if (name) {
+            query = query.whereRaw('LOWER(name) LIKE LOWER(?)', [`%${name}%`]);
+        }
+        
+        if (email) {
+            query = query.whereRaw('LOWER(email) LIKE LOWER(?)', [`%${email}%`]);
+        }
+        
+        if (phone) {
+            query = query.where('phone', 'like', `%${phone}%`);
+        }
 
-        const [data, [{ count }]] = await Promise.all([
-            db('secretarys').select('*').offset(offset).limit(limit),
-            db('secretarys').count('* as count')
-        ]);
-        return { data, total: Number(count) };
+        const countResult = await query.clone().count('id as count').first();
+        const total = countResult ? Number(countResult.count) : 0;
+        
+        const secretaries = await query.select('*').offset(offset).limit(limit);
+        
+        return {
+            data: secretaries,
+            meta: {
+                total: total,
+                page: page,
+                limit: limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
     }
 
     async getById(id: string) {

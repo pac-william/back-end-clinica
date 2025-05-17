@@ -40,35 +40,13 @@ class SecretaryController {
     getAll: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
+        const name = req.query.name as string | undefined;
+        const email = req.query.email as string | undefined;
+        const phone = req.query.phone as string | undefined;
 
         try {
-            const { data, total } = await secretaryService.getAll(page, limit);
-            const totalPages = Math.ceil(total / limit);
-
-            if (page > totalPages && totalPages > 0) {
-                const correctedPage = totalPages;
-                const correctedData = await secretaryService.getAll(correctedPage, limit);
-                res.json({
-                    data: correctedData.data,
-                    meta: {
-                        page: correctedPage,
-                        limit,
-                        total,
-                        totalPages,
-                    },
-                });
-                return;
-            }
-
-            res.json({
-                data,
-                meta: {
-                    page,
-                    limit,
-                    total,
-                    totalPages,
-                },
-            });
+            const secretaries = await secretaryService.getAllSecretaries(page, limit, name, email, phone);
+            res.json(secretaries);
             return;
         } catch (error) {
             console.error(error);
