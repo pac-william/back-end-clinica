@@ -1,45 +1,66 @@
-import db from '../database/connection';
 import bcrypt from 'bcrypt';
-
-type CreateUserInput = {
-  login: string;
-  senha: string;
-  role: 'DOCTOR' | 'SECRETARY' | 'PATIENT';
-  role_id: number;
-};
+import { z } from 'zod';
+import db from '../database/connection';
+import { loginSchema, userSchema } from '../schemas/user.schema';
 
 class UserService {
-
-    
-  async createUser({ login, senha, role, role_id }: CreateUserInput): Promise<any> {
-    const existing = await db('users').where('login', login).first();
+  async createUser({ email, password, role, role_id }: z.infer<typeof userSchema>): Promise<any> {
+    const existing = await db('users').where('email', email).first();
 
     if (existing) {
       return {
         success: false,
-        dados: {
-          login: ['Login já está em uso'],
+        data: {
+          email: ['Email already in use'],
         },
       };
     }
 
-    const senhaCriptografada = await bcrypt.hash(senha, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const [user] = await db('users')
       .insert({
-        login,
-        senha: senhaCriptografada,
+        email,
+        password: hashedPassword,
         role,
         role_id,
       })
-      .returning(['id', 'login', 'role', 'role_id']);
+      .returning(['id', 'email', 'role', 'role_id']);
 
     return {
       success: true,
-      dados: user,
+      data: user,
     };
   }
-  
+
+  async login({ email, password }: z.infer<typeof loginSchema>): Promise<any> {
+    const user = await db('users').where('email', email).first();
+
+    if (!user) {
+      return {
+        success: false,
+        data: {
+          email: ['User not found'],
+        },
+      };
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        data: {
+          password: ['Invalid password'],
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: user,
+    };
+  }
 }
 
 export default UserService;
