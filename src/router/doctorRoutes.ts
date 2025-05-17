@@ -1,12 +1,8 @@
 import express from 'express';
 import DoctorController from '../controllers/doctorController';
-import DoctorService from '../services/doctorService';
-import UserService from '../services/userService';
 
 const router = express.Router();
-const doctorService = new DoctorService();
-const userService = new UserService();
-const doctorController = new DoctorController(doctorService,userService);
+const doctorController = new DoctorController();
 
 /**
  * @swagger
@@ -94,7 +90,7 @@ router.get('/:id', doctorController.getDoctorById);
  * @swagger
  * /api/v1/doctors:
  *   post:
- *     summary: Cria um novo médico e usuário associado
+ *     summary: Cria um novo médico
  *     tags: [Doctors]
  *     requestBody:
  *       required: true
@@ -119,23 +115,15 @@ router.get('/:id', doctorController.getDoctorById);
  *                 type: string
  *                 format: email
  *                 example: carlos@email.com
- *               login:
- *                 type: string
- *                 example: drcarlos
- *               senha:
- *                 type: string
- *                 example: senhaSegura123
  *             required:
  *               - name
  *               - crm
  *               - specialty
  *               - phone
  *               - email
- *               - login
- *               - senha
  *     responses:
  *       201:
- *         description: Médico e usuário criados com sucesso
+ *         description: Médico criado com sucesso
  *         content:
  *           application/json:
  *             schema:
@@ -143,21 +131,6 @@ router.get('/:id', doctorController.getDoctorById);
  *               properties:
  *                 doctor:
  *                   $ref: '#/components/schemas/Doctor'
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
- *                     login:
- *                       type: string
- *                       example: drcarlos
- *                     role:
- *                       type: string
- *                       example: DOCTOR
- *                     role_id:
- *                       type: integer
- *                       example: 1
  *       400:
  *         description: Dados inválidos
  */
