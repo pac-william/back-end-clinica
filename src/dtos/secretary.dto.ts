@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const secretarySchema = z.object({
+export const secretaryDTO = z.object({
   name: z.string().min(3, {
     message: 'Nome deve ter pelo menos 3 caracteres',
   }),

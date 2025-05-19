@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import db from '../database/connection';
-import { loginSchema, userSchema } from '../schemas/user.schema';
+import { loginDTO, userDTO } from '../dtos/user.dto';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'sua_chave_secreta_padrao';
 const TOKEN_EXPIRATION = '1d'; // Token expira em 1 dia
@@ -37,7 +37,7 @@ class UserService {
     };
   }
 
-  async createUser({ email, password, role, role_id }: z.infer<typeof userSchema>): Promise<any> {
+  async createUser({ email, password, role, role_id }: z.infer<typeof userDTO>): Promise<any> {
     const existing = await db('users').where('email', email).first();
 
     if (existing) {
@@ -66,7 +66,7 @@ class UserService {
     };
   }
 
-  async login({ email, password }: z.infer<typeof loginSchema>): Promise<any> {
+  async login({ email, password }: z.infer<typeof loginDTO>): Promise<any> {
     const user = await db('users').where('email', email).first();
 
     if (!user) {

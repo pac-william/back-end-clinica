@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
-import { doctorSchema } from '../schemas/doctor.schema';
+import { doctorDTO } from '../dtos/doctor.dto';
 import DoctorService from '../services/doctorService';
 
 const doctorService = new DoctorService();
@@ -32,7 +32,7 @@ class DoctorController {
 
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
-      doctorSchema.parse(req.body);
+      doctorDTO.parse(req.body);
       const { name, crm, specialty, phone, email } = req.body;
 
       const doctor = await doctorService.createDoctor(name, crm, specialty, phone, email);

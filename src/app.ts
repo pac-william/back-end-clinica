@@ -13,7 +13,7 @@ app.use('/api/v1/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json()); 
 app.use('/', routes);
 
-app.use((req, res) => {
+app.use((_, res) => {
     res.status(404).json({
         message: 'Not Found',
     });

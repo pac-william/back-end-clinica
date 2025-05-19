@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
 import { Secretary } from 'models/secretary';
 import { ZodError } from 'zod';
-import { secretarySchema } from '../schemas/secretary.schema';
+import { secretaryDTO } from '../dtos/secretary.dto';
 import SecretaryService from '../services/secretarysService';
 
 const secretaryService = new SecretaryService();
@@ -10,7 +10,7 @@ class SecretaryController {
 
     create: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
-            const secretaryBody = secretarySchema.parse(req.body) as Secretary;
+            const secretaryBody = secretaryDTO.parse(req.body) as Secretary;
 
             const secretary = await secretaryService.create(secretaryBody);
 
