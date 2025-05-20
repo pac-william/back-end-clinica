@@ -3,7 +3,10 @@ import { Specialty } from './specialty';
 export interface Doctor {
   id?: number;
   name: string;
-  specialty: Specialty;
+  crm: string;
+  specialties: Specialty[];
   phone: string;
-  cpf: string;
+  email: string;
+  created_at?: Date;
+  updated_at?: Date;
 } 

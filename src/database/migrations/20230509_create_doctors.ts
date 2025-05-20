@@ -5,7 +5,6 @@ export async function up(knex: Knex): Promise<void> {
     table.increments('id').primary();
     table.string('name').notNullable();
     table.string('crm').notNullable().unique();
-    table.string('specialty').notNullable();
     table.string('phone', 15);
     table.string('email').unique();
     table.timestamps(true, true);

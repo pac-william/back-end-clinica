@@ -33,9 +33,9 @@ class DoctorController {
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
       doctorDTO.parse(req.body);
-      const { name, crm, specialty, phone, email } = req.body;
+      const { name, crm, specialties, phone, email } = req.body;
 
-      const doctor = await doctorService.createDoctor(name, crm, specialty, phone, email);
+      const doctor = await doctorService.createDoctor(name, crm, specialties, phone, email);
 
       if (!doctor?.success) {
         res.status(400).json(doctor);
@@ -62,14 +62,31 @@ class DoctorController {
   };
 
   updateDoctor: RequestHandler = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { name, crm, specialty, phone, email } = req.body;
-    const doctor = await doctorService.updateDoctor(id, name, crm, specialty, phone, email);
-    if (!doctor) {
-      res.status(404).json({ error: 'Doctor not found' });
-      return;
+    try {
+      doctorDTO.parse(req.body);
+      const { id } = req.params;
+      const { name, crm, specialties, phone, email } = req.body;
+      
+      const doctor = await doctorService.updateDoctor(id, name, crm, specialties, phone, email);
+      
+      if (!doctor?.success) {
+        res.status(400).json(doctor);
+        return;
+      }
+
+      res.json(doctor);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        res.status(400).json({
+          message: "invalid-request",
+          errors: err.issues
+        });
+      } else {
+        res.status(500).json({
+          errors: err
+        });
+      }
     }
-    res.json(doctor);
   };
 
   deleteDoctor: RequestHandler = async (req: Request, res: Response) => {
