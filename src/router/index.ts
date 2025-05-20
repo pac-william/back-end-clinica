@@ -13,9 +13,9 @@ router.get('/', (req, res) => {
 });
 
 // Rotas autenticadas
-router.use('/api/v1/patients', authMiddleware, checkRole([UserRole.ADMIN]), patientRoutes);
-router.use('/api/v1/secretary', authMiddleware, checkRole([UserRole.ADMIN]), secretaryRoutes);
-router.use('/api/v1/doctors', authMiddleware, checkRole([UserRole.ADMIN]), doctorRoutes);
+router.use('/api/v1/patients', authMiddleware, checkRole(['DOCTOR']), patientRoutes);
+router.use('/api/v1/secretary', authMiddleware, checkRole(['DOCTOR']), secretaryRoutes);
+router.use('/api/v1/doctors', authMiddleware, checkRole(['DOCTOR']), doctorRoutes);
 
 // Rotas sem autenticação
 router.use('/api/v1/users', userRoutes);

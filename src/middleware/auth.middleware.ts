@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { UserRole } from 'enums/UserRole';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
