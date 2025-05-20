@@ -238,4 +238,35 @@ router.get("/:id", specialtyController.getById);
  */
 router.put("/:id", specialtyController.update);
 
+/**
+ * @swagger
+ * /api/v1/specialties/{id}:
+ *   delete:
+ *     summary: Deleta uma especialidade pelo ID
+ *     tags: [Especialidades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da especialidade
+ *     responses:
+ *       200:
+ *         description: Especialidade deletada com sucesso
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "ID is required"
+ */
+router.delete("/:id", specialtyController.delete);
+
 export default router;

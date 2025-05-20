@@ -74,6 +74,24 @@ class SpecialtyController {
         res.json(specialty);
     };
 
+    delete: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+        const { id } = req.params;
+
+        if (!id) {
+            res.status(400).json({ error: 'ID is required' });
+            return;
+        }
+
+        const specialty = await specialtyService.delete(Number(id));
+
+        if (!specialty) {
+            res.status(404).json({ error: 'Specialty not found' });
+            return;
+        }
+
+        res.json({ message: 'Specialty deleted successfully' });
+    };
+
 
 }
 export default SpecialtyController;

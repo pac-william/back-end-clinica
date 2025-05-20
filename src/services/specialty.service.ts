@@ -91,6 +91,17 @@ class SpecialtyService {
 
     return updatedSpecialty[0];
   }
+
+  async delete(id: number): Promise<boolean> {
+    const specialty = await db('specialty').where('id', id).first();
+
+    if (!specialty) {
+      return false;
+    }
+
+    await db('specialty').where('id', id).del();
+    return true;
+  }
 }
 
 
