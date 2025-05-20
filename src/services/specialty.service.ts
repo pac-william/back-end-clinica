@@ -32,6 +32,32 @@ class SpecialtyService {
         data: user,
       };
     }
+
+
+    async getAll(page: number = 1, limit: number = 10, name?: string) {
+    const offset = (page - 1) * limit;
+    
+    let query = db('specialty').select(['id', 'name','created_at', 'updated_at']);
+    
+    if (name) {
+      query = query.whereRaw('LOWER(name) LIKE LOWER(?)', [`%${name}%`]);
+    }
+    
+    const countResult = await query.clone().count('id as count').first();
+    const total = countResult ? Number(countResult.count) : 0;
+    
+    const specialties = await query.offset(offset).limit(limit);
+    
+    return {
+      data: specialties,
+      meta: {
+        total: total,
+        page: page,
+        limit: limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
 }
 
 

@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
 router.use('/api/v1/patients', authMiddleware, checkRole([UserRole.ADMIN]), patientRoutes);
 router.use('/api/v1/secretary', authMiddleware, checkRole([UserRole.ADMIN]), secretaryRoutes);
 router.use('/api/v1/doctors', authMiddleware, checkRole([UserRole.ADMIN]), doctorRoutes);
-router.use('/api/v1/specialties', authMiddleware, checkRole([UserRole.ADMIN]), specialtyRoutes);
+router.use('/api/v1/specialties',specialtyRoutes);
 
 // Rotas sem autenticação
 router.use('/api/v1/users', userRoutes);

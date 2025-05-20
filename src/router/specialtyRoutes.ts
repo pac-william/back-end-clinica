@@ -44,35 +44,103 @@ const specialtyController = new SpecialtyController();
  *         description: Erro no servidor
  */
 router.post("/create", specialtyController.createUser);
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Doctor:
+ *       type: object
+ *       required:
+ *         - name
+ *         - crm
+ *         - specialty
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: ID do médico
+ *         name:
+ *           type: string
+ *           description: Nome do médico
+ *         crm:
+ *           type: string
+ *           description: Registro profissional (CRM)
+ *         specialty:
+ *           type: string
+ *           description: Especialidade do médico
+ *         phone:
+ *           type: string
+ *           description: Telefone do médico
+ *         email:
+ *           type: string
+ *           description: Email do médico
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           description: Data de criação
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *           description: Data de atualização
+ */
 
-// /**
-//  * @swagger
-//  * /api/v1/specialties:
-//  *   get:
-//  *     summary: Lista todas as especialidades
-//  *     tags: [Especialidades]
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: Lista de especialidades
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: array
-//  *               items:
-//  *                 type: object
-//  *                 properties:
-//  *                   id:
-//  *                     type: integer
-//  *                     example: 1
-//  *                   name:
-//  *                     type: string
-//  *                     example: "Cardiologia"
-//  *       401:
-//  *         description: Não autorizado
-//  */
-// router.get("/", authMiddleware, specialtyController.findAll.bind(specialtyController));
+/**
+ * @swagger
+ * /api/v1/doctors:
+ *   get:
+ *     summary: Retorna todos os médicos
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número da página para paginação
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Número de itens por página
+ *       - in: query
+ *         name: specialty
+ *         schema:
+ *           type: string
+ *         description: Filtrar médicos por especialidade
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filtrar médicos por nome
+ *     responses:
+ *       200:
+ *         description: Lista de médicos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Doctor'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       description: Total de registros
+ *                     page:
+ *                       type: integer
+ *                       description: Página atual
+ *                     limit:
+ *                       type: integer
+ *                       description: Itens por página
+ *                     totalPages:
+ *                       type: integer
+ *                       description: Total de páginas
+ */
+router.get("/", specialtyController.getAll);
 
 // /**
 //  * @swagger

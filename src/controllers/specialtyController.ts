@@ -18,6 +18,19 @@ class SpecialtyController {
       res.status(201).json(user);
   };
 
+  getAll: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+      try {
+          const page = req.query.page ? parseInt(req.query.page as string) : 1;
+          const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+          const name = req.query.name as string | undefined;
+          
+          const specialties = await specialtyService.getAll(page, limit, name);
+          res.json(specialties);
+      } catch (error: any) {
+          res.status(500).json({ error: 'Failed to retrieve specialties' });
+      }
+  };
+
 
 }
 export default SpecialtyController;
