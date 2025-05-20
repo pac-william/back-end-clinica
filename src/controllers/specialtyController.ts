@@ -27,6 +27,8 @@ class SpecialtyController {
           const specialties = await specialtyService.getAll(page, limit, name);
           res.json(specialties);
       } catch (error: any) {
+        console.log(error);
+        
           res.status(500).json({ error: 'Failed to retrieve specialties' });
       }
   };

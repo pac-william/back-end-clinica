@@ -85,10 +85,10 @@ router.post("/create", specialtyController.createUser);
 
 /**
  * @swagger
- * /api/v1/doctors:
+ * /api/v1/specialties:
  *   get:
- *     summary: Retorna todos os médicos
- *     tags: [Doctors]
+ *     summary: Retorna todas as especialidades
+ *     tags: [Especialidades]
  *     parameters:
  *       - in: query
  *         name: page
@@ -103,18 +103,13 @@ router.post("/create", specialtyController.createUser);
  *           default: 10
  *         description: Número de itens por página
  *       - in: query
- *         name: specialty
- *         schema:
- *           type: string
- *         description: Filtrar médicos por especialidade
- *       - in: query
  *         name: name
  *         schema:
  *           type: string
- *         description: Filtrar médicos por nome
+ *         description: Filtrar especialidades por nome
  *     responses:
  *       200:
- *         description: Lista de médicos
+ *         description: Lista de especialidades
  *         content:
  *           application/json:
  *             schema:
@@ -123,7 +118,7 @@ router.post("/create", specialtyController.createUser);
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Doctor'
+ *                     $ref: '#/components/schemas/Specialty'
  *                 meta:
  *                   type: object
  *                   properties:
