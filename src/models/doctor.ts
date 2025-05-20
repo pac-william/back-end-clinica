@@ -1,6 +1,7 @@
+import { Meta } from './meta';
 import { Specialty } from './specialty';
 
-export interface Doctor {
+export type Doctor = {
   id?: number;
   name: string;
   crm: string;
@@ -9,4 +10,9 @@ export interface Doctor {
   email: string;
   created_at?: Date;
   updated_at?: Date;
-} 
+}
+
+export type DoctorPaginatedResponse = {
+  doctors: Doctor[];
+  meta: Meta;
+};

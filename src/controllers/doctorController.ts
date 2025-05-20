@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
 import { doctorDTO } from '../dtos/doctor.dto';
-import DoctorService from '../services/doctorService';
+import DoctorService from '../services/doctor/doctorService';
 
 const doctorService = new DoctorService();
 
@@ -10,7 +10,7 @@ class DoctorController {
     try {
       const page = req.query.page ? parseInt(req.query.page as string) : 1;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const specialty = req.query.specialty as string | undefined;
+      const specialty = req.query.specialty as number | undefined;
       const name = req.query.name as string | undefined;
 
       const doctors = await doctorService.getAllDoctors(page, limit, specialty, name);
@@ -35,7 +35,7 @@ class DoctorController {
       doctorDTO.parse(req.body);
       const { name, crm, specialties, phone, email } = req.body;
 
-      const doctor = await doctorService.createDoctor(name, crm, specialties, phone, email);
+      const doctor = await doctorService.createDoctor({name, crm, specialties, phone, email});
 
       if (!doctor?.success) {
         res.status(400).json(doctor);
@@ -67,7 +67,7 @@ class DoctorController {
       const { id } = req.params;
       const { name, crm, specialties, phone, email } = req.body;
       
-      const doctor = await doctorService.updateDoctor(id, name, crm, specialties, phone, email);
+      const doctor = await doctorService.updateDoctor(id, {name, crm, specialties, phone, email});
       
       if (!doctor?.success) {
         res.status(400).json(doctor);
@@ -91,11 +91,7 @@ class DoctorController {
 
   deleteDoctor: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await doctorService.deleteDoctor(id);
-    if (!result.id) {
-      res.status(404).json({ error: 'Doctor not found' });
-      return;
-    }
+    await doctorService.deleteDoctor(id);
     res.json({ message: 'Doctor deleted successfully' });
   };
 }

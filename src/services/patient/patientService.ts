@@ -1,7 +1,10 @@
-import db from '../database/connection';
+import db from '../../database/connection';
+import { PatientPort } from './patientPort';
+import { PatientPaginatedResponse } from '../../models/patient';
+import { PatientDTO } from '../../dtos/patient.dot';
 
-class PatientService {
-    async getAllPatients(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string) {
+class PatientService implements PatientPort {
+    async getAllPatients(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string): Promise<PatientPaginatedResponse> {
         const offset = (page - 1) * limit;
         
         let query = db('patients');
@@ -24,12 +27,11 @@ class PatientService {
         const patients = await query.select('*').offset(offset).limit(limit);
         
         return {
-            data: patients,
+            patients: patients,
             meta: {
                 total: total,
                 page: page,
                 limit: limit,
-                totalPages: Math.ceil(total / limit)
             }
         };
     }
@@ -39,20 +41,19 @@ class PatientService {
         return patient;
     }
 
-    async createPatient(name: string, email: string, phone: string) {
-        const [patient] = await db('patients').insert({ name, email, phone }).returning('*');
+    async createPatient(patient: PatientDTO) {
+        const [patientResult] = await db('patients').insert({ name: patient.name, address: patient.address, phone: patient.phone, cpf: patient.cpf }).returning('*');
 
-        return patient;
+        return patientResult;
     }
 
-    async updatePatient(id: string, name: string, email: string, phone: string) {
-        const patient = await db('patients').where('id', id).update({ name, email, phone });
-        return patient;
+    async updatePatient(id: string, patient: PatientDTO) {
+        const [patientResult] = await db('patients').where('id', id).update({ name: patient.name, address: patient.address, phone: patient.phone, cpf: patient.cpf }).returning('*');
+        return patientResult;
     }
 
     async deletePatient(id: string) {
-        const patient = await db('patients').where('id', id).delete();
-        return patient;
+        await db('patients').where('id', id).delete();
     }
 }
 

@@ -1,6 +1,6 @@
 import { Secretary } from 'models/secretary';
 import db from '../database/connection';
-import DoctorService from './doctorService';
+import DoctorService from './doctor/doctorService';
 
 class SecretaryService {
     async getAllSecretaries(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string): Promise<{ data: Secretary[]; meta: { total: number, page: number, limit: number, totalPages: number } }> {

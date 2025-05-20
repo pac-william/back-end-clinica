@@ -1,5 +1,5 @@
 import { Request, RequestHandler, Response } from 'express';
-import PatientService from '../services/patientService';
+import PatientService from '../services/patient/PatientService';
 
 const patientService = new PatientService();
 
@@ -34,9 +34,9 @@ class PatientController {
 
   createPatient: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const { name, email, phone } = req.body;
+      const { name, address, phone, cpf } = req.body;
 
-      const patient = await patientService.createPatient(name, email, phone);
+      const patient = await patientService.createPatient({name, address, phone, cpf});
 
       res.status(201).json({
         patient: patient
@@ -50,8 +50,8 @@ class PatientController {
   updatePatient: RequestHandler = async (req: Request, res: Response): Promise<any> => {
     try {
       const { id } = req.params;
-      const { name, email, phone } = req.body;
-      const patient = await patientService.updatePatient(id, name, email, phone);
+      const { name, address, phone, cpf } = req.body;
+      const patient = await patientService.updatePatient(id, {name, address, phone, cpf});
       if (!patient) {
         return res.status(404).json({ message: 'Patient not found' });
       }
@@ -65,9 +65,6 @@ class PatientController {
     try {
       const { id } = req.params;
       const patient = await patientService.deletePatient(id);
-      if (!patient) {
-        return res.status(404).json({ message: 'Patient not found' });
-      }
       res.json({ message: 'Patient deleted successfully' });
     } catch (error: any) {
       res.status(500).json({ error: 'Failed to delete patient' });
