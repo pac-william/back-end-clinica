@@ -1,47 +1,23 @@
-import { Request, Response } from "express";
-import { createSpecialtyDTO } from "../dtos/specialty.dto";
+import { Request, RequestHandler, Response } from 'express';
 import SpecialtyService from "../services/specialty.service";
 
-export default class SpecialtyController {
-  private service = new SpecialtyService();
+const specialtyService = new SpecialtyService();
 
-  create(req: Request, res: Response) {
-    const parseResult = createSpecialtyDTO.safeParse(req.body);
-    if (!parseResult.success) {
-      return res.status(400).json({ errors: parseResult.error.format() });
-    }
 
-    const specialty = this.service.create(parseResult.data);
-    return res.status(201).json(specialty);
-  }
+class SpecialtyController {
 
-  update(req: Request, res: Response) {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
+  createUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+      const {name} = req.body;
 
-    const parseResult = createSpecialtyDTO.safeParse(req.body);
-    if (!parseResult.success) {
-      return res.status(400).json({ errors: parseResult.error.format() });
-    }
+      if (name && name.length < 3) {
+          res.status(400).json({ error: 'Name must be at least 3 characters long' });
+          return;
+      }
 
-    const specialty = this.service.update(id, parseResult.data);
-    if (!specialty) return res.status(404).json({ error: "Especialidade não encontrada." });
+      const user = await specialtyService.createUser({ name });
+      res.status(201).json(user);
+  };
 
-    return res.json(specialty);
-  }
 
-  findAll(req: Request, res: Response) {
-    const specialties = this.service.findAll();
-    return res.json(specialties);
-  }
-
-  findById(req: Request, res: Response) {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
-
-    const specialty = this.service.findById(id);
-    if (!specialty) return res.status(404).json({ error: "Especialidade não encontrada." });
-
-    return res.json(specialty);
-  }
 }
+export default SpecialtyController;

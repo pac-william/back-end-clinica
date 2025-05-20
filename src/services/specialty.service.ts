@@ -1,37 +1,38 @@
-import { CreateSpecialtyDTO } from "../dtos/specialty.dto";
+import { z } from 'zod';
+import db from '../database/connection';
+import { createSpecialtyDTO } from '../dtos/specialty.dto';
 
 interface Specialty {
   id: number;
   name: string;
 }
 
-export default class SpecialtyService {
-  private specialties: Specialty[] = [];
-  private currentId = 1;
+class SpecialtyService {
 
-  create(data: CreateSpecialtyDTO): Specialty {
-    const specialty = {
-      id: this.currentId++,
-      name: data.name.trim(),
-    };
+  async createUser({ name }: z.infer<typeof createSpecialtyDTO>): Promise<any> {
 
-    this.specialties.push(specialty);
-    return specialty;
-  }
-
-  update(id: number, data: CreateSpecialtyDTO): Specialty | null {
-    const index = this.specialties.findIndex((s) => s.id === id);
-    if (index === -1) return null;
-
-    this.specialties[index].name = data.name.trim();
-    return this.specialties[index];
-  }
-
-  findAll(): Specialty[] {
-    return this.specialties;
-  }
-
-  findById(id: number): Specialty | null {
-    return this.specialties.find((s) => s.id === id) || null;
-  }
+    
+      const existing = await db('specialty').where('name', name).first();
+  
+      if (existing) {
+        return {
+          success: false,
+          data: {
+            email: ['Name already in use'],
+          },
+        };
+      }
+  
+  
+      const [user] = await db('specialty')
+        .insert({name}).returning(['id', 'name']);
+  
+      return {
+        success: true,
+        data: user,
+      };
+    }
 }
+
+
+export default SpecialtyService;
