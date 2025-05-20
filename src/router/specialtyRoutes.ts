@@ -85,10 +85,10 @@ router.post("/create", specialtyController.createUser);
 
 /**
  * @swagger
- * /api/v1/doctors:
+ * /api/v1/specialties:
  *   get:
- *     summary: Retorna todos os médicos
- *     tags: [Doctors]
+ *     summary: Retorna todas as especialidades
+ *     tags: [Especialidades]
  *     parameters:
  *       - in: query
  *         name: page
@@ -103,18 +103,13 @@ router.post("/create", specialtyController.createUser);
  *           default: 10
  *         description: Número de itens por página
  *       - in: query
- *         name: specialty
- *         schema:
- *           type: string
- *         description: Filtrar médicos por especialidade
- *       - in: query
  *         name: name
  *         schema:
  *           type: string
- *         description: Filtrar médicos por nome
+ *         description: Filtrar especialidades por nome
  *     responses:
  *       200:
- *         description: Lista de médicos
+ *         description: Lista de especialidades
  *         content:
  *           application/json:
  *             schema:
@@ -123,7 +118,7 @@ router.post("/create", specialtyController.createUser);
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Doctor'
+ *                     $ref: '#/components/schemas/Specialty'
  *                 meta:
  *                   type: object
  *                   properties:
@@ -141,90 +136,137 @@ router.post("/create", specialtyController.createUser);
  *                       description: Total de páginas
  */
 router.get("/", specialtyController.getAll);
+/**
+ * @swagger
+ * /api/v1/specialties/{id}:
+ *   get:
+ *     summary: Retorna uma especialidade pelo ID
+ *     tags: [Especialidades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID da especialidade
+ *     responses:
+ *       200:
+ *         description: Especialidade encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Specialty'
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "ID is required"
+ *       404:
+ *         description: Especialidade não encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Specialty not found"
+ */
+router.get("/:id", specialtyController.getById);
+/**
+ * @swagger
+ * /api/v1/specialties/{id}:
+ *   put:
+ *     summary: Atualiza uma especialidade pelo ID
+ *     tags: [Especialidades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da especialidade
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nome da especialidade (mínimo 3 caracteres)
+ *                 example: "Cardiologia"
+ *     responses:
+ *       200:
+ *         description: Especialidade atualizada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Specialty'
+ *       400:
+ *         description: Dados inválidos ou ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Name must be at least 3 characters long"
+ *       404:
+ *         description: Especialidade não encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Specialty not found"
+ */
+router.put("/:id", specialtyController.update);
 
-// /**
-//  * @swagger
-//  * /api/v1/specialties/{id}:
-//  *   get:
-//  *     summary: Retorna uma especialidade pelo ID
-//  *     tags: [Especialidades]
-//  *     security:
-//  *       - bearerAuth: []
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         schema:
-//  *           type: integer
-//  *         required: true
-//  *         description: ID da especialidade
-//  *     responses:
-//  *       200:
-//  *         description: Especialidade encontrada
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: object
-//  *               properties:
-//  *                 id:
-//  *                   type: integer
-//  *                   example: 1
-//  *                 name:
-//  *                   type: string
-//  *                   example: "Cardiologia"
-//  *       400:
-//  *         description: ID inválido
-//  *       404:
-//  *         description: Especialidade não encontrada
-//  */
-// router.get("/:id", authMiddleware, specialtyController.findById.bind(specialtyController));
-
-// /**
-//  * @swagger
-//  * /api/v1/specialties/{id}:
-//  *   put:
-//  *     summary: Atualiza uma especialidade pelo ID
-//  *     tags: [Especialidades]
-//  *     security:
-//  *       - bearerAuth: []
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         schema:
-//  *           type: integer
-//  *         required: true
-//  *         description: ID da especialidade
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             required:
-//  *               - name
-//  *             properties:
-//  *               name:
-//  *                 type: string
-//  *                 description: Nome da especialidade (mínimo 3 caracteres)
-//  *                 example: "Cardiologia"
-//  *     responses:
-//  *       200:
-//  *         description: Especialidade atualizada com sucesso
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: object
-//  *               properties:
-//  *                 id:
-//  *                   type: integer
-//  *                   example: 1
-//  *                 name:
-//  *                   type: string
-//  *                   example: "Cardiologia"
-//  *       400:
-//  *         description: Dados inválidos ou ID inválido
-//  *       404:
-//  *         description: Especialidade não encontrada
-//  */
-// router.put("/:id", authMiddleware, specialtyController.update.bind(specialtyController));
+/**
+ * @swagger
+ * /api/v1/specialties/{id}:
+ *   delete:
+ *     summary: Deleta uma especialidade pelo ID
+ *     tags: [Especialidades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da especialidade
+ *     responses:
+ *       200:
+ *         description: Especialidade deletada com sucesso
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "ID is required"
+ */
+router.delete("/:id", specialtyController.delete);
 
 export default router;
