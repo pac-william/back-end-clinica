@@ -13,7 +13,7 @@ const doctorController = new DoctorController();
  *       required:
  *         - name
  *         - crm
- *         - specialty
+ *         - specialties
  *       properties:
  *         id:
  *           type: integer
@@ -24,9 +24,17 @@ const doctorController = new DoctorController();
  *         crm:
  *           type: string
  *           description: Registro profissional (CRM)
- *         specialty:
- *           type: string
- *           description: Especialidade do médico
+ *         specialties:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 description: ID da especialidade
+ *               name:
+ *                 type: string
+ *                 description: Nome da especialidade
  *         phone:
  *           type: string
  *           description: Telefone do médico
@@ -146,9 +154,12 @@ router.get('/:id', doctorController.getDoctorById);
  *               crm:
  *                 type: string
  *                 example: "123456"
- *               specialty:
- *                 type: string
- *                 example: Cardiologia
+ *               specialties:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 example: [1, 2]
+ *                 description: IDs das especialidades do médico
  *               phone:
  *                 type: string
  *                 example: "+55 31 98765-4321"
@@ -159,7 +170,7 @@ router.get('/:id', doctorController.getDoctorById);
  *             required:
  *               - name
  *               - crm
- *               - specialty
+ *               - specialties
  *               - phone
  *               - email
  *     responses:
