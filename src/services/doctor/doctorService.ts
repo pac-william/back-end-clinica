@@ -161,6 +161,8 @@ class DoctorService implements DoctorPort {
   async deleteDoctor(id: string) {
     await db('doctors').where('id', id).delete();
   }
+
+  
 }
 
 export default DoctorService;

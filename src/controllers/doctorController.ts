@@ -94,6 +94,8 @@ class DoctorController {
     await doctorService.deleteDoctor(id);
     res.json({ message: 'Doctor deleted successfully' });
   };
+
+  
 }
 
 export default DoctorController;
