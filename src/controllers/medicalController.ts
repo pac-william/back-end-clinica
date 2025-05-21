@@ -1,30 +1,29 @@
 import { Request, RequestHandler, Response } from 'express';
-import { ZodError } from 'zod';
-import { doctorDTO } from '../dtos/doctor.dto';
 import MedicalRecordService from '../services/medicalRecordService';
-
+import { log } from 'console';
 
 const medicalRecordService = new MedicalRecordService();
 
-class medicalController {
+class MedicalController {
+  newMedicalRecord: RequestHandler = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { patientId, description } = req.body;
 
-    newMedicalRecord: RequestHandler = async (req: Request, res: Response) => {
-        const { id } = req.params;
-        const { patientId, description } = req.body;
-
-
-        if (!patientId || !description) {
-            res.status(400).json({ error: 'Patient ID and description are required' });
-            return;
-        }
-
-        const medicalRecord = await medicalRecordService.newMedicalRecord(id, patientId, description);
-        if (!medicalRecord) {
-            res.status(404).json({ error: 'Doctor not found' });
-            return;
-        }
-        res.json(medicalRecord);
+    if (!id || !patientId || !description) {
+      res.status(400).json({ error: 'Doctor ID, patient ID, and description are required' });
+      return;
     }
+
+    try {
+      const medicalRecord = await medicalRecordService.newMedicalRecord(id, patientId, description);
+
+      res.status(201).json(medicalRecord);
+    } catch (error: any) {
+        log(error);
+      console.error("Erro ao criar prontuário:", error);
+      res.status(500).json({ error: 'Erro interno ao criar prontuário médico' });
+    }
+  };
 }
 
-export default medicalController;
+export default MedicalController;

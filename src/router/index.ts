@@ -5,6 +5,7 @@ import doctorRoutes from './doctorRoutes';
 import patientRoutes from './patientRoutes';
 import secretaryRoutes from './secretaryRouter';
 import specialtyRoutes from './specialtyRoutes';
+import medical from './medicalRecordRoute';
 import userRoutes from './userRoutes';
 
 const router = express.Router();
@@ -18,6 +19,8 @@ router.use('/api/v1/patients', authMiddleware, checkRole(['DOCTOR']), patientRou
 router.use('/api/v1/secretary', authMiddleware, checkRole(['DOCTOR']), secretaryRoutes);
 router.use('/api/v1/doctors', authMiddleware, checkRole(['DOCTOR']), doctorRoutes);
 router.use('/api/v1/specialties',specialtyRoutes);
+router.use('/api/v1/medical-records',medical);
+
 
 // Rotas sem autenticação
 router.use('/api/v1/users', userRoutes);

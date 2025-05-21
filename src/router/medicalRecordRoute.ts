@@ -1,9 +1,8 @@
 import express from "express";
-import medicalController from "../controllers/medicalController";
+import MedicalController from "../controllers/medicalController";
 
 const router = express.Router();
-
-const medicalRecordController = new medicalController();
+const medicalController = new MedicalController();
 
 /**
  * @swagger
@@ -11,7 +10,8 @@ const medicalRecordController = new medicalController();
  *   post:
  *     summary: Cria um novo prontuário médico
  *     tags: [Prontuários Médicos]
- *     security: []
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -32,12 +32,11 @@ const medicalRecordController = new medicalController();
  *               patientId:
  *                 type: string
  *                 description: ID do paciente
- *                 example: "12345"
+ *                 example: "4"
  *               description:
  *                 type: string
  *                 description: Descrição do prontuário médico
  *                 example: "Paciente com dor no peito"
- *
  *     responses:
  *       201:
  *         description: Prontuário médico criado com sucesso
@@ -45,13 +44,11 @@ const medicalRecordController = new medicalController();
  *           application/json:
  *             schema:
  *               type: object
- *
- *
+ *       400:
+ *         description: Dados inválidos
+ *       404:
+ *         description: Médico não encontrado
  */
-router.post("/:id", medicalRecordController.newMedicalRecord);
-
-
-
-
+router.post("/:id", medicalController.newMedicalRecord);
 
 export default router;

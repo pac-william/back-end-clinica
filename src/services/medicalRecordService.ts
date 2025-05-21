@@ -5,8 +5,9 @@ class MedicalRecordService {
   async newMedicalRecord(id: string, patientId: string, description: string) {
     const trx = await db.transaction();
 
+    
     try {
-      const [record] = await trx('medical_records')
+      const [record] = await trx('medical_record')
         .insert({
           doctor_id: id,
           patient_id: patientId,
