@@ -51,4 +51,31 @@ const medicalController = new MedicalController();
  */
 router.post("/:id", medicalController.newMedicalRecord);
 
+/**
+ * @swagger
+ * /api/v1/medical-records/{id}:
+ *   get:
+ *     summary: Obtém todos os prontuários médicos de um médico
+ *     tags: [Prontuários Médicos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do médico
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lista de prontuários médicos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+router.get("/:id", medicalController.getMedicalRecords);
+
 export default router;

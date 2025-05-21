@@ -22,6 +22,22 @@ class MedicalRecordService {
       throw error;
     }
   }
+
+  async getMedicalRecords(id: string) {
+    const trx = await db.transaction();
+
+    try {
+      const records = await trx('medical_record')
+        .where('doctor_id', id)
+        .select('*');
+
+      await trx.commit();
+      return records;
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
 }
 
 export default MedicalRecordService;
