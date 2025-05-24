@@ -2,18 +2,22 @@ import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
 import { doctorDTO } from '../dtos/doctor.dto';
 import DoctorService from '../services/doctor/doctorService';
+import { QueryBuilder } from '../utils/QueryBuilder';
 
 const doctorService = new DoctorService();
 
 class DoctorController {
   getAllDoctors: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const page = req.query.page ? parseInt(req.query.page as string) : 1;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const specialty = req.query.specialty as number | undefined;
-      const name = req.query.name as string | undefined;
+      const { page, size, specialty, name } = QueryBuilder.from(req.query)
+        .withNumber('page', 1)
+        .withNumber('size', 10)
+        .withNumber('specialty')
+        .withString('name')
+        .build();
 
-      const doctors = await doctorService.getAllDoctors(page, limit, specialty, name);
+      const doctors = await doctorService.getAllDoctors(page, size, specialty, name);
+
       res.json(doctors);
     } catch (error: any) {
       res.status(500).json({ error });
@@ -21,13 +25,17 @@ class DoctorController {
   };
 
   getDoctorById: RequestHandler = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const doctor = await doctorService.getDoctorById(id);
-    if (!doctor) {
-      res.status(404).json({ error: 'Doctor not found' });
-      return;
+    try {
+      const { id } = req.params;
+      const doctor = await doctorService.getDoctorById(id);
+      if (!doctor) {
+        res.status(404).json({ error: 'Doctor not found' });
+        return;
+      }
+      res.json(doctor);
+    } catch (error: any) {
+      res.status(500).json({ error });
     }
-    res.json(doctor);
   };
 
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
@@ -35,7 +43,7 @@ class DoctorController {
       doctorDTO.parse(req.body);
       const { name, crm, specialties, phone, email } = req.body;
 
-      const doctor = await doctorService.createDoctor({name, crm, specialties, phone, email});
+      const doctor = await doctorService.createDoctor({ name, crm, specialties, phone, email });
 
       if (!doctor?.success) {
         res.status(400).json(doctor);
@@ -66,9 +74,9 @@ class DoctorController {
       doctorDTO.parse(req.body);
       const { id } = req.params;
       const { name, crm, specialties, phone, email } = req.body;
-      
-      const doctor = await doctorService.updateDoctor(id, {name, crm, specialties, phone, email});
-      
+
+      const doctor = await doctorService.updateDoctor(id, { name, crm, specialties, phone, email });
+
       if (!doctor?.success) {
         res.status(400).json(doctor);
         return;
@@ -94,8 +102,6 @@ class DoctorController {
     await doctorService.deleteDoctor(id);
     res.json({ message: 'Doctor deleted successfully' });
   };
-
-  
 }
 
 export default DoctorController;
