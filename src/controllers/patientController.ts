@@ -1,18 +1,20 @@
 import { Request, RequestHandler, Response } from 'express';
-import PatientService from '../services/patient/PatientService';
+import PatientService from '../services/patientService';
+import { QueryBuilder } from '../utils/QueryBuilder';
 
 const patientService = new PatientService();
 
 class PatientController {
   getAllPatients: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const page = req.query.page ? parseInt(req.query.page as string) : 1;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const name = req.query.name as string | undefined;
-      const email = req.query.email as string | undefined;
-      const phone = req.query.phone as string | undefined;
-      
-      const patients = await patientService.getAllPatients(page, limit, name, email, phone);
+      const { page, size, name, email, phone } = QueryBuilder.from(req.query)
+        .withNumber('page', 1)
+        .withNumber('size', 10)
+        .withString('name')
+        .withString('email')
+        .withString('phone')
+        .build();
+      const patients = await patientService.getAllPatients(page, size, name, email, phone);
       res.json(patients);
     } catch (error: any) {
       res.status(500).json({ error: 'Failed to retrieve patients' });
@@ -36,7 +38,7 @@ class PatientController {
     try {
       const { name, address, phone, cpf } = req.body;
 
-      const patient = await patientService.createPatient({name, address, phone, cpf});
+      const patient = await patientService.createPatient({ name, address, phone, cpf });
 
       res.status(201).json({
         patient: patient
@@ -51,7 +53,7 @@ class PatientController {
     try {
       const { id } = req.params;
       const { name, address, phone, cpf } = req.body;
-      const patient = await patientService.updatePatient(id, {name, address, phone, cpf});
+      const patient = await patientService.updatePatient(id, { name, address, phone, cpf });
       if (!patient) {
         return res.status(404).json({ message: 'Patient not found' });
       }

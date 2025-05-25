@@ -65,7 +65,7 @@ const doctorController = new DoctorController();
  *           default: 1
  *         description: Número da página para paginação
  *       - in: query
- *         name: limit
+ *         name: size
  *         schema:
  *           type: integer
  *           default: 10
@@ -73,7 +73,9 @@ const doctorController = new DoctorController();
  *       - in: query
  *         name: specialty
  *         schema:
- *           type: string
+ *           type: array
+ *           items:
+ *             type: integer
  *         description: Filtrar médicos por especialidade
  *       - in: query
  *         name: name
@@ -101,7 +103,7 @@ const doctorController = new DoctorController();
  *                     page:
  *                       type: integer
  *                       description: Página atual
- *                     limit:
+ *                     size:
  *                       type: integer
  *                       description: Itens por página
  *                     totalPages:

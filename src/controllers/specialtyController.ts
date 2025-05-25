@@ -1,5 +1,5 @@
 import { Request, RequestHandler, Response } from 'express';
-import SpecialtyService from "../services/specialty.service";
+import SpecialtyService from "../services/specialtyService";
 
 const specialtyService = new SpecialtyService();
 

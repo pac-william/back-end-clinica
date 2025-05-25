@@ -1,5 +1,5 @@
 export interface Meta {
     total: number;
     page: number;
-    limit: number;
+    size: number;
 }

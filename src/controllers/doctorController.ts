@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
 import { doctorDTO } from '../dtos/doctor.dto';
-import DoctorService from '../services/doctor/doctorService';
+import DoctorService from '../services/doctorService';
 import { QueryBuilder } from '../utils/QueryBuilder';
 
 const doctorService = new DoctorService();
@@ -9,14 +9,14 @@ const doctorService = new DoctorService();
 class DoctorController {
   getAllDoctors: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const { page, size, specialty, name } = QueryBuilder.from(req.query)
+      const filters = QueryBuilder.from(req.query)
         .withNumber('page', 1)
         .withNumber('size', 10)
-        .withNumber('specialty')
+        .withArray('specialty')
         .withString('name')
         .build();
 
-      const doctors = await doctorService.getAllDoctors(page, size, specialty, name);
+      const doctors = await doctorService.getAllDoctors(filters);
 
       res.json(doctors);
     } catch (error: any) {

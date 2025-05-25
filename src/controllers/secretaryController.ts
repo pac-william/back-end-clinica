@@ -7,7 +7,6 @@ import SecretaryService from '../services/secretarysService';
 const secretaryService = new SecretaryService();
 
 class SecretaryController {
-
     create: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
             const secretaryBody = secretaryDTO.parse(req.body) as Secretary;

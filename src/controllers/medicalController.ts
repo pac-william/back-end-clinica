@@ -1,6 +1,7 @@
+import { log } from 'console';
 import { Request, RequestHandler, Response } from 'express';
 import MedicalRecordService from '../services/medicalRecordService';
-import { log } from 'console';
+import { QueryBuilder } from '../utils/QueryBuilder';
 
 const medicalRecordService = new MedicalRecordService();
 
@@ -26,11 +27,13 @@ class MedicalController {
   };
 
   getMedicalRecords: RequestHandler = async (req: Request, res: Response) => {
-      const { id } = req.params;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const offset = (page - 1) * limit;
-      
+    const { id } = req.params;
+    const { page, size } = QueryBuilder.from(req.query)
+      .withNumber('page', 1)
+      .withNumber('size', 10)
+      .build();
+    const offset = (page - 1) * size;
+
     if (!id) {
       res.status(400).json({ error: 'Doctor ID is required' });
       return;
@@ -38,19 +41,19 @@ class MedicalController {
 
 
     try {
-      const { data, total } = await medicalRecordService.getMedicalRecords(id, limit, offset);
+      const { data, total } = await medicalRecordService.getMedicalRecords(id, size, offset);
 
-    const totalPages = Math.ceil(total / limit);
+      const totalPages = Math.ceil(total / size);
 
-    return res.status(200).json({
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages,
-      },
-    });
+      res.status(200).json({
+        data,
+        meta: {
+          total,
+          page,
+          size,
+          totalPages,
+        },
+      });
     } catch (error: any) {
       log(error);
       console.error("Erro ao obter prontuários:", error);
@@ -60,18 +63,18 @@ class MedicalController {
 
   getMedicalRecordById: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
-    
+
     if (!id) {
       res.status(400).json({ error: 'Medical record ID is required' });
       return;
     }
 
     try {
-      const medicalRecord = await medicalRecordService.getMedicalRecordById(id); 
+      const medicalRecord = await medicalRecordService.getMedicalRecordById(id);
       if (!medicalRecord) {
         res.status(404).json({ error: 'Medical record not found' });
         return;
-      } 
+      }
       res.status(200).json(medicalRecord);
     } catch (error: any) {
       log(error);
@@ -79,7 +82,7 @@ class MedicalController {
       res.status(500).json({ error: 'Erro interno ao obter prontuário médico' });
     }
   }
-    
+
 }
 
 export default MedicalController;

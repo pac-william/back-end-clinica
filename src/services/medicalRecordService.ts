@@ -1,4 +1,3 @@
-import { MedicalRecord } from 'models/medicalRecord';
 import db from '../database/connection';
 
 class MedicalRecordService {
@@ -23,7 +22,7 @@ class MedicalRecordService {
     }
   }
 
-  async getMedicalRecords(doctorId: string, limit: number, offset: number) {
+  async getMedicalRecords(doctorId: string, page: number, size: number) {
     const trx = await db.transaction();
 
     try {
@@ -35,8 +34,7 @@ class MedicalRecordService {
 
       const records = await trx('medical_record')
         .where('doctor_id', doctorId)
-        .limit(limit)
-        .offset(offset)
+        .limit(size)
         .select('*');
 
       await trx.commit();

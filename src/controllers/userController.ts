@@ -10,7 +10,7 @@ class UserController {
             const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
             const email = req.query.email as string | undefined;
             const role = req.query.role as string | undefined;
-            
+
             const users = await userService.getAllUsers(page, limit, email, role);
             res.json(users);
         } catch (error: any) {
