@@ -1,52 +1,64 @@
-export class QueryBuilder {
-    private query: Record<string, any> = {};
+export class QueryBuilder<TQuery extends Record<string, any> = {}> {
+    private query: Record<string, any>;
 
-    constructor(query: any) {
+    constructor(query: Record<string, any>) {
         this.query = { ...query };
     }
 
-    static from(query: any): QueryBuilder {
+    static from<TQuery extends Record<string, any>>(query: TQuery): QueryBuilder<TQuery> {
         return new QueryBuilder(query);
     }
 
-    /**
-     * Processa um valor numérico da query
-     * 
-     * @param key Nome do parâmetro na query
-     * @param defaultValue Valor padrão a ser utilizado caso o parâmetro não exista ou seja inválido
-     * @returns Instância do QueryBuilder para encadeamento
-     */
-    withNumber(key: string, defaultValue?: number): QueryBuilder {
-        this.query[key] = this.query[key] !== undefined
-            ? Number(this.query[key]) || defaultValue
-            : defaultValue;
-        return this;
+    withNumber<K extends string, V extends number | undefined = number | undefined>(
+        key: K,
+        defaultValue?: V
+    ): QueryBuilder<TQuery & { [P in K]: number | V }> {
+        const value = Number(this.query[key]);
+        this.query[key] = !isNaN(value) ? value : defaultValue;
+        return this as any;
     }
 
-    /**
-     * Processa um valor de string da query
-     * 
-     * @param key Nome do parâmetro na query
-     * @param defaultValue Valor padrão a ser utilizado caso o parâmetro não exista ou seja inválido
-     * @returns Instância do QueryBuilder para encadeamento
-     */
-    withString(key: string, defaultValue?: string): QueryBuilder {
-        this.query[key] = this.query[key] !== undefined ? String(this.query[key]) : defaultValue;
-        return this;
+    withString<K extends string, V extends string | undefined = string | undefined>(
+        key: K,
+        defaultValue?: V
+    ): QueryBuilder<TQuery & { [P in K]: string | V }> {
+        const value = this.query[key];
+        this.query[key] = typeof value === 'string' ? value : defaultValue;
+        return this as any;
     }
 
-    /**
-     * Processa um valor booleano da query
-     * 
-     * @param key Nome do parâmetro na query
-     * @param defaultValue Valor padrão a ser utilizado caso o parâmetro não exista ou seja inválido
-     */
-    withBoolean(key: string, defaultValue?: boolean): QueryBuilder {
-        this.query[key] = this.query[key] !== undefined ? this.query[key] === 'true' : defaultValue;
-        return this;
+    withBoolean<K extends string, V extends boolean | undefined = boolean | undefined>(
+        key: K,
+        defaultValue?: V
+    ): QueryBuilder<TQuery & { [P in K]: boolean | V }> {
+        const value = this.query[key];
+        this.query[key] =
+            value === 'true' || value === true
+                ? true
+                : value === 'false' || value === false
+                ? false
+                : defaultValue;
+        return this as any;
     }
 
-    build<T = any>(): T {
-        return this.query as unknown as T;
+    withArray<K extends string, V extends any[] | undefined = any[] | undefined>(
+        key: K,
+        defaultValue?: V
+    ): QueryBuilder<TQuery & { [P in K]: any[] | V }> {
+        const value = this.query[key];
+        
+        if (Array.isArray(value)) {
+            this.query[key] = value;
+        } else if (value !== undefined) {
+            this.query[key] = [value];
+        } else {
+            this.query[key] = defaultValue;
+        }
+        
+        return this as any;
+    }
+
+    build(): TQuery {
+        return this.query as TQuery;
     }
 }

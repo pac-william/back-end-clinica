@@ -10,22 +10,22 @@ const TOKEN_EXPIRATION = '1d'; // Token expira em 1 dia
 class UserService {
   async getAllUsers(page: number = 1, limit: number = 10, email?: string, role?: string) {
     const offset = (page - 1) * limit;
-    
+
     let query = db('users').select(['id', 'email', 'role', 'role_id', 'created_at', 'updated_at']);
-    
+
     if (email) {
       query = query.whereRaw('LOWER(email) LIKE LOWER(?)', [`%${email}%`]);
     }
-    
+
     if (role) {
       query = query.whereRaw('LOWER(role) = LOWER(?)', [role]);
     }
 
     const countResult = await query.clone().count('id as count').first();
     const total = countResult ? Number(countResult.count) : 0;
-    
+
     const users = await query.offset(offset).limit(limit);
-    
+
     return {
       data: users,
       meta: {
@@ -38,6 +38,7 @@ class UserService {
   }
 
   async createUser({ email, password, role, role_id }: z.infer<typeof userDTO>): Promise<any> {
+
     const existing = await db('users').where('email', email).first();
 
     if (existing) {
