@@ -1,9 +1,7 @@
 import { DoctorPaginatedResponse } from 'models/doctor';
 import db from '../database/connection';
-import { DoctorDTO } from '../dtos/doctor.dto';
 import { DoctorRepository } from '../repository/doctorRepository';
 import { SpecialtyRepository } from '../repository/specialtyRepository';
-
 const doctorRepository = new DoctorRepository();
 const specialtyRepository = new SpecialtyRepository();
 
@@ -21,7 +19,7 @@ class DoctorService {
     return doctor;
   }
 
-  async createDoctor(doctor: DoctorDTO): Promise<any> {
+  async createDoctor(doctor: any): Promise<any> {
     const existing = await doctorRepository.getFirstWhere(doctor.crm, doctor.email);
 
     if (existing) {
@@ -67,7 +65,7 @@ class DoctorService {
     }
   }
 
-  async updateDoctor(id: string, doctor: DoctorDTO) {
+  async updateDoctor(id: string, doctor: any) {
     try {
       // Verificar se todas as especialidades existem
       const existingSpecialties = await specialtyRepository.getSpecialtiesByIds(doctor.specialties);
