@@ -1,8 +1,8 @@
 import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
-import { doctorDTO } from '../dtos/doctor.dto';
 import DoctorService from '../services/doctorService';
 import { QueryBuilder } from '../utils/QueryBuilder';
+import {DoctorDTO} from '../dtos/doctor.dto';
 
 const doctorService = new DoctorService();
 
@@ -40,7 +40,7 @@ class DoctorController {
 
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
-      doctorDTO.parse(req.body);
+      DoctorDTO.parse(req.body);
       const { name, crm, specialties, phone, email } = req.body;
 
       const doctor = await doctorService.createDoctor({ name, crm, specialties, phone, email });
@@ -71,7 +71,7 @@ class DoctorController {
 
   updateDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
-      doctorDTO.parse(req.body);
+      DoctorDTO.parse(req.body);
       const { id } = req.params;
       const { name, crm, specialties, phone, email } = req.body;
 
