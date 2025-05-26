@@ -1,6 +1,6 @@
 import db from '../database/connection';
-import { PatientDTO } from '../dtos/patient.dot';
-import { PatientPaginatedResponse } from '../models/patient';
+import { PatientDTO } from '../dtos/patient.dto';
+import { Patient, PatientPaginatedResponse } from '../models/patient';
 
 class PatientService {
     async getAllPatients(page: number, size: number, name?: string, email?: string, phone?: string): Promise<PatientPaginatedResponse> {
@@ -40,9 +40,8 @@ class PatientService {
         return patient;
     }
 
-    async createPatient(patient: PatientDTO) {
-        const [patientResult] = await db('patients').insert({ name: patient.name, address: patient.address, phone: patient.phone, cpf: patient.cpf }).returning('*');
-
+    async createPatient(patient: Patient) {
+        const [patientResult] = await db('patients').insert(patient).returning('*');
         return patientResult;
     }
 
