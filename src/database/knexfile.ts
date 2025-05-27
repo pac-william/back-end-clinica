@@ -12,7 +12,8 @@ const config: { [key: string]: Knex.Config } = {
       port: +(process.env.DB_PORT || 5432),
       user: process.env.DB_USER,
       password: process.env.DB_PASS,
-      database: process.env.DB_NAME
+      database: process.env.DB_NAME,
+      ssl: process.env.SSL_ENABLED === 'true' ? { rejectUnauthorized: false } : false
     },
     migrations: {
       extension: 'ts',
@@ -22,7 +23,16 @@ const config: { [key: string]: Knex.Config } = {
       extension: 'ts',
       directory: path.resolve(__dirname, 'seeds')
     },
-    useNullAsDefault: true
+    useNullAsDefault: true,
+    pool: {
+      min: 2,
+      max: 10,
+      afterCreate: (conn: any, done: any) => {
+        conn.query(`SET search_path TO ${process.env.DB_SCHEMA || 'public'}`, (err: any) => {
+          done(err, conn);
+        });
+      }
+    }
   }
 };
 
