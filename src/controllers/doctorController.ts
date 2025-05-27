@@ -7,6 +7,11 @@ import {DoctorDTO} from '../dtos/doctor.dto';
 const doctorService = new DoctorService();
 
 class DoctorController {
+  /**
+   * Lista todos os médicos, com filtros opcionais por especialidade, nome, paginação, etc.
+   * @param req Requisição HTTP contendo possíveis filtros na query
+   * @param res Resposta HTTP com a lista de médicos
+   */
   getAllDoctors: RequestHandler = async (req: Request, res: Response) => {
     try {
       const filters = QueryBuilder.from(req.query)
@@ -24,6 +29,11 @@ class DoctorController {
     }
   };
 
+  /**
+   * Busca um médico específico pelo seu id.
+   * @param req Requisição HTTP contendo o id do médico nos parâmetros
+   * @param res Resposta HTTP com o médico encontrado ou erro 404
+   */
   getDoctorById: RequestHandler = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
@@ -38,6 +48,11 @@ class DoctorController {
     }
   };
 
+  /**
+   * Cria um novo médico no sistema.
+   * @param req Requisição HTTP contendo os dados do médico no body
+   * @param res Resposta HTTP com o médico criado ou erros de validação
+   */
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
       DoctorDTO.parse(req.body);
@@ -69,6 +84,11 @@ class DoctorController {
     }
   };
 
+  /**
+   * Atualiza os dados de um médico existente.
+   * @param req Requisição HTTP contendo o id do médico nos parâmetros e os novos dados no body
+   * @param res Resposta HTTP com o médico atualizado ou erros de validação
+   */
   updateDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
       DoctorDTO.parse(req.body);
@@ -97,6 +117,11 @@ class DoctorController {
     }
   };
 
+  /**
+   * Remove um médico do sistema pelo seu id.
+   * @param req Requisição HTTP contendo o id do médico nos parâmetros
+   * @param res Resposta HTTP confirmando a exclusão
+   */
   deleteDoctor: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     await doctorService.deleteDoctor(id);
