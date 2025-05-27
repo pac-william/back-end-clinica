@@ -43,7 +43,7 @@ export class DoctorRepository {
     }
 
     async updateDoctor(id: string, doctor: Doctor) {
-        return db('doctors').where('id', id).update(doctor);
+        return db('doctors').where('id', id).update(doctor).returning('*');
     }
 
     async deleteDoctor(id: string) {

@@ -1,3 +1,4 @@
+import { DoctorDTO } from 'dtos/doctor.dto';
 import { DoctorPaginatedResponse } from 'models/doctor';
 import db from '../database/connection';
 import { DoctorRepository } from '../repository/doctorRepository';
@@ -65,43 +66,35 @@ class DoctorService {
     }
   }
 
-  async updateDoctor(id: string, doctor: any) {
+  async updateDoctor(id: string, doctor: DoctorDTO): Promise<{ success: boolean; doctor: DoctorDTO }> {
     try {
-      // Verificar se todas as especialidades existem
       const existingSpecialties = await specialtyRepository.getSpecialtiesByIds(doctor.specialties);
 
       if (existingSpecialties.length !== doctor.specialties.length) {
-        return {
-          success: false,
-          data: {
-            specialties: ['Uma ou mais especialidades não existem']
-          }
-        };
+        throw new Error('Uma ou mais especialidades não existem');
       }
 
-      const [updatedDoctor] = await db('doctors').where('id', id).update({
+      const dataToUpdate = {
         name: doctor.name,
         crm: doctor.crm,
         phone: doctor.phone,
         email: doctor.email,
-        specialties_ids: doctor.specialties, // Atualiza os IDs de especialidades diretamente
-        updated_at: db.fn.now(),
-      }).returning('*');
+        specialties: existingSpecialties,
+      }
+
+      const [updatedDoctor] = await doctorRepository.updateDoctor(id, dataToUpdate);
 
       return {
         success: true,
-        data: {
-          ...updatedDoctor,
-          specialties: existingSpecialties
-        }
-      };
+        doctor: updatedDoctor,
+      }
     } catch (error) {
       throw error;
     }
   }
 
   async deleteDoctor(id: string) {
-    await db('doctors').where('id', id).delete();
+    await doctorRepository.deleteDoctor(id);
   }
 }
 
