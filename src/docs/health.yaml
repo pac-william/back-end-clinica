@@ -1,0 +1,114 @@
+paths:
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Verifica o status básico do sistema
+      description: Retorna informações básicas sobre o status do sistema, incluindo uso de memória e tempo de execução
+      responses:
+        '200':
+          description: Sistema está funcionando normalmente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  uptime:
+                    type: string
+                    example: "2h 30m"
+                  memory:
+                    type: object
+                    properties:
+                      used:
+                        type: string
+                        example: "256MB"
+                      total:
+                        type: string
+                        example: "1024MB"
+                  version:
+                    type: string
+                    example: "1.0.0"
+        '503':
+          description: Sistema indisponível
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "DOWN"
+                  error:
+                    type: string
+                    example: "Service Unavailable"
+                  details:
+                    type: string
+                    example: "Internal server error"
+
+  /health/detailed:
+    get:
+      tags:
+        - Health Check
+      summary: Verifica o status detalhado do sistema
+      description: Retorna informações detalhadas sobre o status do sistema, incluindo informações do ambiente e recursos
+      responses:
+        '200':
+          description: Sistema está funcionando normalmente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  uptime:
+                    type: string
+                    example: "2h 30m"
+                  memory:
+                    type: object
+                    properties:
+                      used:
+                        type: string
+                        example: "256MB"
+                      total:
+                        type: string
+                        example: "1024MB"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  environment:
+                    type: string
+                    example: "development"
+                  nodeVersion:
+                    type: string
+                    example: "v16.14.0"
+                  platform:
+                    type: string
+                    example: "linux"
+                  cpus:
+                    type: number
+                    example: 4
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-03-20T10:30:00Z"
+        '503':
+          description: Sistema indisponível
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "DOWN"
+                  error:
+                    type: string
+                    example: "Service Unavailable"
+                  details:
+                    type: string
+                    example: "Internal server error" 
