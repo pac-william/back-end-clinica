@@ -48,6 +48,15 @@ class PatientService {
                 message: 'Invalid CPF'
             }
         };
+
+        patient.cpf = patient.cpf.length > 11 ? Utils.removeMask(patient.cpf) : patient.cpf;
+        if(await this.getByCpf(patient.cpf)) {
+            return  {
+                message: "Patient with this CPF already exists",
+                success: false
+            };
+        }
+
         const [patientResult] = await db('patients').insert(patient).returning('*');
         return {
             success: true,
@@ -62,6 +71,11 @@ class PatientService {
 
     async deletePatient(id: string) {
         await db('patients').where('id', id).delete();
+    }
+
+    async getByCpf(cpf: string) {
+        const patient = await db('patients').where('cpf', cpf).first();
+        return patient;
     }
 }
 

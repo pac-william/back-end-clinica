@@ -15,6 +15,10 @@ class Utils
         });
         return result;
     }
+
+    public static removeMask(value: string): string {
+        return value.replace(/\D/g, '');
+    }
 }
 
 export default Utils;
