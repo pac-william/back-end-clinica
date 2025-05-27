@@ -42,7 +42,10 @@ class MedicalRecordService {
         .returning('*');
 
       await trx.commit();
-      return record;
+      return {
+        success: true,
+        data: record
+      };
     } catch (error) {
       await trx.rollback();
       throw error;
