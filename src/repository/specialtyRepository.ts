@@ -1,6 +1,6 @@
 import db from "../database/connection";
 import { Specialty } from "../models/specialty";
-
+import { MetaBuilder } from "../utils/MetaBuilder";
 export class SpecialtyRepository {
     async getAllSpecialties(page: number, size: number, name?: string) {
         const offset = (page - 1) * size;
@@ -17,11 +17,7 @@ export class SpecialtyRepository {
 
         return {
             specialties: specialties,
-            meta: {
-                total: total,
-                page: page,
-                size: size,
-            }
+            meta: new MetaBuilder(total, page, size).build()
         };
     }
 
