@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
-import { UserRole } from 'enums/UserRole';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { UserRole } from '../enums/UserRole';
 
 dotenv.config();
 
@@ -51,27 +51,30 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY) as TokenPayload;
-    
+
     req.user = {
       id: decoded.id,
       email: decoded.email,
       role: decoded.role
     };
-    
+
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token inválido' });
   }
 };
 
-export const checkRole = (roles: string[]) => {
+export const checkRole = (roles: UserRole[]) => {
+
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({ message: 'Usuário não autenticado' });
       return;
     }
 
-    if (!roles.includes(req.user.role)) {
+    const role = UserRole[req.user.role as keyof typeof UserRole];
+
+    if (!roles.includes(role)) {
       res.status(403).json({ message: 'Acesso não autorizado' });
       return;
     }

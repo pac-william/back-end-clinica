@@ -1,5 +1,7 @@
 import express from 'express';
 import DoctorController from '../controllers/doctorController';
+import { UserRole } from '../enums/UserRole';
+import { checkRole } from '../middleware/auth.middleware';
 
 const router = express.Router();
 const doctorController = new DoctorController();
@@ -236,6 +238,6 @@ router.put('/:id', doctorController.updateDoctor);
  *       404:
  *         description: Médico não encontrado
  */
-router.delete('/:id', doctorController.deleteDoctor);
+router.delete('/:id', checkRole([UserRole.ADMIN]), doctorController.deleteDoctor);
 
 export default router;

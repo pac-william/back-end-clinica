@@ -1,4 +1,5 @@
 import express from 'express';
+import { UserRole } from '../enums/UserRole';
 import { authMiddleware, checkRole } from '../middleware/auth.middleware';
 import doctorRoutes from './doctorRoutes';
 import medical from './medicalRecordRoute';
@@ -14,11 +15,11 @@ router.get('/', (req, res) => {
 });
 
 // Rotas autenticadas
-router.use('/api/v1/patients', authMiddleware, checkRole(['DOCTOR']), patientRoutes);
-router.use('/api/v1/secretary', authMiddleware, checkRole(['DOCTOR']), secretaryRoutes);
-router.use('/api/v1/doctors', authMiddleware, checkRole(['DOCTOR']), doctorRoutes);
-router.use('/api/v1/specialties', specialtyRoutes);
-router.use('/api/v1/medical-records', medical);
+router.use('/api/v1/patients', authMiddleware, checkRole([UserRole.ADMIN, UserRole.MASTER]), patientRoutes);
+router.use('/api/v1/secretary', authMiddleware, checkRole([UserRole.ADMIN, UserRole.MASTER]), secretaryRoutes);
+router.use('/api/v1/doctors', authMiddleware, checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorRoutes);
+router.use('/api/v1/specialties', authMiddleware, checkRole([UserRole.ADMIN, UserRole.MASTER]), specialtyRoutes);
+router.use('/api/v1/medical-records', authMiddleware, checkRole([UserRole.ADMIN, UserRole.MASTER]), medical);
 
 
 // Rotas sem autenticação
