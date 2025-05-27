@@ -39,16 +39,16 @@ class PatientController {
   createPatient: RequestHandler = async (req: Request, res: Response) => {
     try {
       const body = patientDTO.parse(req.body);
+      const response = await patientService.createPatient(body);
+      if(!response.success) {
+        res.status(400).json({
+          message: response.message
+        });
+        return;
+      }
 
-      const patient = await patientService.createPatient(body);
-
-      res.status(201).json({
-        patient: patient
-      });
-
+      res.status(201).json(response.data);
     }
-
-
     catch (err: any) {
       if (err instanceof ZodError) {
         res.status(400).json({

@@ -1,15 +1,10 @@
-import MedicalRecordRepository from '../repository/medical_record.repository';
+
 import db from '../database/connection';
 import { Doctor } from '../models/doctor';
 import DoctorService from './doctorService';
 import PatientService from './patientService';
 
 class MedicalRecordService {
-  private medicalRecordRepository: MedicalRecordRepository;
-  constructor() {
-    this.medicalRecordRepository = new MedicalRecordRepository();
-  }
-  
   async newMedicalRecord(id: string, patientId: string, description: string) {
     const trx = await db.transaction();
 

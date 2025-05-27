@@ -1,3 +1,4 @@
+import Utils from '../utils/utils';
 import db from '../database/connection';
 import { PatientDTO } from '../dtos/patient.dto';
 import { Patient, PatientPaginatedResponse } from '../models/patient';
@@ -41,8 +42,17 @@ class PatientService {
     }
 
     async createPatient(patient: Patient) {
+        if(!Utils.checkCPF(patient.cpf)) {
+            return {
+                success:false,
+                message: 'Invalid CPF'
+            }
+        };
         const [patientResult] = await db('patients').insert(patient).returning('*');
-        return patientResult;
+        return {
+            success: true,
+            data: patientResult
+        };
     }
 
     async updatePatient(id: string, patient: PatientDTO) {
