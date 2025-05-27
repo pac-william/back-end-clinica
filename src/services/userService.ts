@@ -11,7 +11,7 @@ class UserService {
   async getAllUsers(page: number = 1, limit: number = 10, email?: string, role?: string) {
     const offset = (page - 1) * limit;
 
-    let query = db('users').select(['id', 'email', 'role', 'role_id', 'created_at', 'updated_at']);
+    let query = db('users').select(['id', 'email', 'role', 'created_at', 'updated_at']);
 
     if (email) {
       query = query.whereRaw('LOWER(email) LIKE LOWER(?)', [`%${email}%`]);
@@ -37,7 +37,7 @@ class UserService {
     };
   }
 
-  async createUser({ email, password, role, role_id }: z.infer<typeof userDTO>): Promise<any> {
+  async createUser({ email, password, role }: z.infer<typeof userDTO>): Promise<any> {
 
     const existing = await db('users').where('email', email).first();
 
@@ -57,9 +57,8 @@ class UserService {
         email,
         password: hashedPassword,
         role,
-        role_id,
       })
-      .returning(['id', 'email', 'role', 'role_id']);
+      .returning(['id', 'email', 'role']);
 
     return {
       success: true,
@@ -110,7 +109,6 @@ class UserService {
           id: user.id,
           email: user.email,
           role: user.role,
-          role_id: user.role_id
         },
         token
       },

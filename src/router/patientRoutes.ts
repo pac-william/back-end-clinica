@@ -193,9 +193,6 @@ router.get('/:id', patientController.getPatientById);
  *                     role:
  *                       type: string
  *                       example: PATIENT
- *                     role_id:
- *                       type: integer
- *                       example: 1
  *       400:
  *         description: Dados inválidos
  *       401:

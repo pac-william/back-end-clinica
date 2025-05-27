@@ -19,14 +19,14 @@ class UserController {
     };
 
     createUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-        const { email, password, role, role_id } = req.body;
+        const { email, password, role } = req.body;
 
         if (role != 'USER' && role != 'ADMIN' && role != 'MASTER') {
             res.status(400).json({ error: 'Invalid role' });
             return;
         }
 
-        const user = await userService.createUser({ email, password, role, role_id });
+        const user = await userService.createUser({ email, password, role });
         res.status(201).json(user);
     };
 

@@ -22,7 +22,6 @@ const userController = new UserController();
  *               - email
  *               - password
  *               - role
- *               - role_id
  *             properties:
  *               email:
  *                 type: string
@@ -35,9 +34,6 @@ const userController = new UserController();
  *               role:
  *                 type: string
  *                 description: Função do usuário (admin, médico, paciente, etc)
- *               role_id:
- *                 type: integer
- *                 description: ID da função específica do usuário
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso
@@ -112,9 +108,6 @@ router.post('/create', userController.createUser);
  *                         role:
  *                           type: string
  *                           example: "ADMIN"
- *                         role_id:
- *                           type: integer
- *                           example: 1
  *                     token:
  *                       type: string
  *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjE5NjI3OTk2LCJleHAiOjE2MTk3MTQzOTZ9.Lgg_Nt0HdGilTBCoRQdP3cW4JYkJWVw5"

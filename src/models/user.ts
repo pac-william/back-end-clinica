@@ -5,5 +5,4 @@ interface User {
   login: string;
   senha: string;
   role: Role;
-  role_id: number;
 }
