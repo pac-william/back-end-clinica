@@ -51,10 +51,10 @@ export class DoctorRepository {
 
     async getDoctorById(id: string) {
         const doctor = await db('doctors').where('id', id).first();
-        const specialties = await db('specialty_doctor')
-            .join('specialties', 'specialties.id', 'specialty_doctor.specialty_id')
+        const specialties = await db('doctor_specialties')
+            .join('specialty', 'specialty.id', 'doctor_specialties.specialty_id')
             .where('doctor_id', id)
-            .select('specialty_doctor.doctor_id', 'specialty_doctor.specialty_id', 'specialties.name as specialty_name');
+            .select('doctor_specialties.doctor_id', 'doctor_specialties.specialty_id', 'specialty.name as specialty_name');
 
         return {
             ...doctor,
