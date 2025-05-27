@@ -10,11 +10,11 @@ export class DoctorRepository {
         if (specialty && specialty.length > 0) {
             const specialtyIds = specialty.map(Number);
             querySpecialty = querySpecialty.whereIn('specialty_id', specialtyIds);
-            
+
             const doctorIds = db('specialty_doctor')
                 .whereIn('specialty_id', specialtyIds)
                 .select('doctor_id');
-                
+
             queryDoctor = queryDoctor.whereIn('id', doctorIds);
         }
 
@@ -30,7 +30,7 @@ export class DoctorRepository {
             .join('specialties', 'specialties.id', 'specialty_doctor.specialty_id')
             .whereIn('doctor_id', doctors.map(doctor => doctor.id))
             .select('specialty_doctor.doctor_id', 'specialty_doctor.specialty_id', 'specialties.name as specialty_name');
-            
+
         return {
             doctors: doctors.map(doctor => ({
                 ...doctor,
@@ -49,7 +49,16 @@ export class DoctorRepository {
     }
 
     async getDoctorById(id: string) {
-        return db('doctors').where('id', id).first();
+        const doctor = await db('doctors').where('id', id).first();
+        const specialties = await db('specialty_doctor')
+            .join('specialties', 'specialties.id', 'specialty_doctor.specialty_id')
+            .where('doctor_id', id)
+            .select('specialty_doctor.doctor_id', 'specialty_doctor.specialty_id', 'specialties.name as specialty_name');
+
+        return {
+            ...doctor,
+            specialties: specialties.map(specialty => specialty.specialty_id)
+        };
     }
 
     async createDoctor(doctor: Doctor) {
