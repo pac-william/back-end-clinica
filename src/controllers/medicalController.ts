@@ -18,6 +18,11 @@ class MedicalController {
     try {
       const medicalRecord = await medicalRecordService.newMedicalRecord(id, patientId, description);
 
+      if (!medicalRecord.success) {
+        res.status(401).json(medicalRecord);
+        return;
+      }
+
       res.status(201).json(medicalRecord);
     } catch (error: any) {
       log(error);

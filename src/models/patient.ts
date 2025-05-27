@@ -1,10 +1,11 @@
 import { Meta } from "./meta";
 
 export interface Patient {
-  id: number;
+  id?: number;
   name: string;
   address: string;
   phone: string;
+  birth_date: Date;
   cpf: string;
 } 
 

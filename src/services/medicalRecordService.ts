@@ -1,10 +1,32 @@
+
 import db from '../database/connection';
+import { Doctor } from '../models/doctor';
+import DoctorService from './doctorService';
+import PatientService from './patientService';
 
 class MedicalRecordService {
   async newMedicalRecord(id: string, patientId: string, description: string) {
     const trx = await db.transaction();
 
+    const doctorService = new DoctorService();
+    const doctor: Doctor = await doctorService.getDoctorById(id);
+    if (!doctor) {
+        return {
+          success: false,
+          message: 'Doctor not found'
+        };
+    }
 
+    const patientService = new PatientService();
+    const patient = await patientService.getPatientById(patientId);
+
+    if (!patient) {
+      return {
+        success: false,
+        message: 'Patient not found'
+      };
+    }
+    
     try {
       const [record] = await trx('medical_record')
         .insert({
@@ -15,7 +37,10 @@ class MedicalRecordService {
         .returning('*');
 
       await trx.commit();
-      return record;
+      return {
+        success: true,
+        data: record
+      };
     } catch (error) {
       await trx.rollback();
       throw error;

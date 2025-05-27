@@ -1,6 +1,8 @@
 import { Request, RequestHandler, Response } from 'express';
 import PatientService from '../services/patientService';
 import { QueryBuilder } from '../utils/QueryBuilder';
+import { patientDTO } from '../dtos/patient.dto';
+import { ZodError } from 'zod';
 
 const patientService = new PatientService();
 
@@ -36,24 +38,36 @@ class PatientController {
 
   createPatient: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const { name, address, phone, cpf } = req.body;
+      const body = patientDTO.parse(req.body);
+      const response = await patientService.createPatient(body);
+      if(!response.success) {
+        res.status(400).json({
+          message: response.message
+        });
+        return;
+      }
 
-      const patient = await patientService.createPatient({ name, address, phone, cpf });
-
-      res.status(201).json({
-        patient: patient
-      });
-
-    } catch (error: any) {
-      res.status(500).json({ error: 'Failed to create patient' });
+      res.status(201).json(response.data);
+    }
+    catch (err: any) {
+      if (err instanceof ZodError) {
+        res.status(400).json({
+          message: "invalid-request",
+          errors: err.issues
+        });
+      } else {
+        res.status(500).json({
+          errors: err
+        });
+      }
     }
   };
 
   updatePatient: RequestHandler = async (req: Request, res: Response): Promise<any> => {
     try {
       const { id } = req.params;
-      const { name, address, phone, cpf } = req.body;
-      const patient = await patientService.updatePatient(id, { name, address, phone, cpf });
+      const { name, address, phone, cpf, birth_date } = req.body;
+      const patient = await patientService.updatePatient(id, { name, address, phone, cpf, birth_date });
       if (!patient) {
         return res.status(404).json({ message: 'Patient not found' });
       }
