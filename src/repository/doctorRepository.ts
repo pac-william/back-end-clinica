@@ -1,5 +1,6 @@
 import { Doctor, DoctorPaginatedResponse } from "models/doctor";
 import db from "../database/connection";
+import { MetaBuilder } from "../utils/MetaBuilder";
 
 export class DoctorRepository {
     async getAllDoctors(page: number, size: number, specialty?: number[], name?: string): Promise<DoctorPaginatedResponse> {
@@ -26,7 +27,7 @@ export class DoctorRepository {
         const total = countResult ? Number(countResult.count) : 0;
 
         const doctors = await queryDoctor.offset(offset).limit(size);
-        
+
         const specialties = await db('doctor_specialties')
             .join('specialty', 'specialty.id', 'doctor_specialties.specialty_id')
             .whereIn('doctor_id', doctors.map(doctor => doctor.id))
@@ -37,11 +38,7 @@ export class DoctorRepository {
                 ...doctor,
                 specialties: specialties.filter(specialty => specialty.doctor_id === doctor.id).map(specialty => specialty.specialty_id)
             })),
-            meta: {
-                total: total,
-                page: page,
-                size: size,
-            }
+            meta: new MetaBuilder(total, page, size).build()
         };
     }
 
@@ -50,16 +47,29 @@ export class DoctorRepository {
     }
 
     async getDoctorById(id: string) {
-        const doctor = await db('doctors').where('id', id).first();
-        const specialties = await db('doctor_specialties')
-            .join('specialty', 'specialty.id', 'doctor_specialties.specialty_id')
-            .where('doctor_id', id)
-            .select('doctor_specialties.doctor_id', 'doctor_specialties.specialty_id', 'specialty.name as specialty_name');
+        try {
+            const doctor = await db('doctors').where('id', id).first();
+            const specialties = await db('doctor_specialties')
+                .join('specialty', 'specialty.id', 'doctor_specialties.specialty_id')
+                .where('doctor_id', id)
+                .select('doctor_specialties.doctor_id', 'doctor_specialties.specialty_id', 'specialty.name as specialty_name');
 
-        return {
-            ...doctor,
-            specialties: specialties.map(specialty => specialty.specialty_id)
-        };
+            return {
+                ...doctor,
+                specialties: specialties.map(specialty => specialty.specialty_id)
+            };
+        } catch (error) {
+            console.error("Erro ao buscar médico:", error);
+            return {
+                message: "Erro ao buscar informações do médico",
+                error: {
+                    errorType: error instanceof Error ? error.name : "Erro desconhecido",
+                    errorMessage: error instanceof Error ? error.message : String(error),
+                    errorLocation: "DoctorRepository.getDoctorById",
+                    doctorId: id
+                }
+            };
+        }
     }
 
     async createDoctor(doctor: Doctor) {
