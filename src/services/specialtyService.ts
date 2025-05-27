@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import db from '../database/connection';
-import { createSpecialtyDTO } from '../dtos/specialty.dto';
+import { SpecialtyDTO } from '../dtos/specialty.dto';
 
 interface Specialty {
   id: number;
@@ -9,7 +9,7 @@ interface Specialty {
 
 class SpecialtyService {
 
-  async createUser({ name }: z.infer<typeof createSpecialtyDTO>): Promise<any> {
+  async createUser({ name }: z.infer<typeof SpecialtyDTO>): Promise<any> {
 
 
     const existing = await db('specialty').where('name', name).first();
