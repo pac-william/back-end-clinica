@@ -1,8 +1,8 @@
 import express from 'express';
-import NursesController from '../controllers/secretaryController';
+import SecretaryController from '../controllers/secretaryController';
 
 const router = express.Router();
-const secretaryController = new NursesController();
+const secretaryController = new SecretaryController();
 
 /**
  * @swagger
