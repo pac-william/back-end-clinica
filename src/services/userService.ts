@@ -1,45 +1,34 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import db from '../database/connection';
 import { loginDTO, userDTO } from '../dtos/user.dto';
+import { UserRepository } from '../repository/userRepository';
+import { getUserRoleFromToken } from '../utils/decodeTokenJWT';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'sua_chave_secreta_padrao';
-const TOKEN_EXPIRATION = '1d'; // Token expira em 1 dia
+const SECRET_KEY = process.env.JWT_SECRET;
+const TOKEN_EXPIRATION = '1d';
+
+const userRepository = new UserRepository();
 
 class UserService {
   async getAllUsers(page: number = 1, limit: number = 10, email?: string, role?: string) {
-    const offset = (page - 1) * limit;
-
-    let query = db('users').select(['id', 'email', 'role', 'created_at', 'updated_at']);
-
-    if (email) {
-      query = query.whereRaw('LOWER(email) LIKE LOWER(?)', [`%${email}%`]);
-    }
-
-    if (role) {
-      query = query.whereRaw('LOWER(role) = LOWER(?)', [role]);
-    }
-
-    const countResult = await query.clone().count('id as count').first();
-    const total = countResult ? Number(countResult.count) : 0;
-
-    const users = await query.offset(offset).limit(limit);
-
-    return {
-      data: users,
-      meta: {
-        total: total,
-        page: page,
-        limit: limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    };
+    return userRepository.getAllUsers(page, limit, email, role);
   }
 
-  async createUser({ email, password, role }: z.infer<typeof userDTO>): Promise<any> {
+  async createUser({ email, password, role }: z.infer<typeof userDTO>, token?: string): Promise<any> {
+    if (role !== 'USER') {
+      if (!token) {
+        throw new Error('Token não fornecido');
+      }
 
-    const existing = await db('users').where('email', email).first();
+      const userRole = getUserRoleFromToken(token);
+
+      if (userRole !== 'ADMIN' && userRole !== 'MASTER') {
+        throw new Error('Permissão negada para criar este tipo de usuário');
+      }
+    }
+
+    const existing = await userRepository.getUserByEmail(email);
 
     if (existing) {
       return {
@@ -52,13 +41,11 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [user] = await db('users')
-      .insert({
-        email,
-        password: hashedPassword,
-        role,
-      })
-      .returning(['id', 'email', 'role']);
+    const user = await userRepository.createUser({
+      email,
+      password: hashedPassword,
+      role: role,
+    });
 
     return {
       success: true,
@@ -67,7 +54,7 @@ class UserService {
   }
 
   async login({ email, password }: z.infer<typeof loginDTO>): Promise<any> {
-    const user = await db('users').where('email', email).first();
+    const user = await userRepository.getUserByEmail(email);
 
     if (!user) {
       return {
@@ -89,7 +76,10 @@ class UserService {
       };
     }
 
-    // Gerar token JWT
+    if (!SECRET_KEY) {
+      throw new Error('Chave secreta não configurada');
+    }
+
     const token = jwt.sign(
       {
         id: user.id,

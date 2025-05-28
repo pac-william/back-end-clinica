@@ -1,8 +1,10 @@
 type Role = 'DOCTOR' | 'SECRETARY' | 'PATIENT';
 
-interface User {
+export interface User {
   id: number;
-  login: string;
-  senha: string;
+  email: string;
+  password: string;
   role: Role;
+  created_at: Date;
+  updated_at: Date;
 }
