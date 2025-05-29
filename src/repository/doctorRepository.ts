@@ -144,36 +144,62 @@ export class DoctorRepository {
   }
 
   /**
-   * Atualiza os dados e especialidades de um médico em transação.
+   * Atualiza parcialmente os dados e especialidades de um médico em transação.
    * @param id ID do médico
    * @param doctor DTO com os dados atualizados
    */
-  async updateDoctorWithSpecialties(id: string, doctor: DoctorDTO) {
+  async updateDoctorWithSpecialties(id: string, doctor: Partial<DoctorDTO>) {
     return db.transaction(async (trx) => {
+      const doctorData = {
+        ...(doctor.name && { name: doctor.name }),
+        ...(doctor.crm && { crm: doctor.crm }),
+        ...(doctor.phone && { phone: doctor.phone }),
+        ...(doctor.email && { email: doctor.email }),
+      };
+
       const [updatedDoctor] = await trx('doctors')
         .where('id', id)
-        .update({
-          name: doctor.name,
-          crm: doctor.crm,
-          phone: doctor.phone,
-          email: doctor.email,
-        })
+        .update(doctorData)
         .returning('*');
 
-      await trx('doctor_specialties').where('doctor_id', id).delete();
+      if (doctor.specialties !== undefined) {
+        const currentSpecialties = await trx('doctor_specialties')
+          .where('doctor_id', id)
+          .select('specialty_id');
 
-      if (doctor.specialties.length > 0) {
-        const specialtyRelations = doctor.specialties.map(specialtyId => ({
-          doctor_id: id,
-          specialty_id: specialtyId
-        }));
+        const currentIds = currentSpecialties.map(s => s.specialty_id);
+        const newIds = doctor.specialties;
 
-        await trx('doctor_specialties').insert(specialtyRelations);
+        // Verifica se há diferença entre as especialidades atuais e as novas
+        const toRemove = currentIds.filter(id => !newIds.includes(id));
+        const toAdd = newIds.filter(id => !currentIds.includes(id));
+
+        if (toRemove.length > 0) {
+          await trx('doctor_specialties')
+            .where('doctor_id', id)
+            .whereIn('specialty_id', toRemove)
+            .delete();
+        }
+
+        if (toAdd.length > 0) {
+          const specialtyRelations = toAdd.map(specialtyId => ({
+            doctor_id: id,
+            specialty_id: specialtyId
+          }));
+
+          await trx('doctor_specialties').insert(specialtyRelations);
+        }
       }
+
+      // Busca as especialidades atualizadas
+      const specialties = await trx('doctor_specialties')
+        .join('specialties', 'specialties.id', 'doctor_specialties.specialty_id')
+        .where('doctor_id', id)
+        .select('specialty_id');
 
       return {
         ...updatedDoctor,
-        specialties: doctor.specialties
+        specialties: specialties.map(s => s.specialty_id)
       };
     });
   }

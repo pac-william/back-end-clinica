@@ -57,15 +57,15 @@ class DoctorController {
    */
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const doctor = DoctorDTO.parse(req.body);
-      const created = await doctorService.createDoctor(doctor);
+      const parsedDoctor = DoctorDTO.parse(req.body);
+      const doctor = await doctorService.createDoctor(parsedDoctor);
 
-      if (created instanceof ErrorResponse) {
-        res.status(created.statusCode).json(created);
+      if (doctor instanceof ErrorResponse) {
+        res.status(doctor.statusCode).json(doctor);
         return;
       }
 
-      res.status(201).json({ doctor: created });
+      res.status(201).json(doctor);
     } catch (err) {
       if (err instanceof ZodError) {
         res.status(400).json({
@@ -79,13 +79,13 @@ class DoctorController {
   };
 
   /**
-   * Atualiza os dados de um médico existente.
-   * @param req Requisição HTTP contendo o id do médico nos parâmetros e os novos dados no body
+   * Atualiza parcialmente os dados de um médico existente.
+   * @param req Requisição HTTP contendo o id do médico nos parâmetros e os dados parciais no body
    * @param res Resposta HTTP com o médico atualizado ou erros de validação
    */
   updateDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const doctor = DoctorDTO.parse(req.body);
+      const doctor = DoctorDTO.partial().parse(req.body);
       const { id } = req.params;
 
       const updated = await doctorService.updateDoctor(id, doctor);

@@ -59,12 +59,17 @@ class DoctorService {
     }
   }
 
-  async updateDoctor(id: string, doctor: DoctorDTO): Promise<DoctorDTO | ErrorResponse> {
+  async updateDoctor(id: string, doctor: Partial<DoctorDTO>): Promise<DoctorDTO | ErrorResponse> {
     try {
-      const existingSpecialties = await specialtyRepository.getSpecialtiesByIds(doctor.specialties);
+      if (doctor.specialties) {
+        const existingSpecialties = await specialtyRepository.getSpecialtiesByIds(doctor.specialties);
+        if (existingSpecialties.length !== doctor.specialties.length) {
+          return new ErrorResponse('Uma ou mais especialidades não existem', 400);
+        }
+      }
 
-      if (existingSpecialties.length !== doctor.specialties.length) {
-        return new ErrorResponse('Uma ou mais especialidades não existem', 400);
+      if (doctor.phone) {
+        doctor.phone = Utils.formatPhone(doctor.phone);
       }
 
       const updatedDoctor = await doctorRepository.updateDoctorWithSpecialties(id, doctor);

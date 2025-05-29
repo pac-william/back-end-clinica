@@ -198,29 +198,53 @@ router.post('/', doctorController.createDoctor);
 /**
  * @swagger
  * /api/v1/doctors/{id}:
- *   put:
- *     summary: Atualiza um médico
+ *   patch:
+ *     summary: Atualiza parcialmente um médico
  *     tags: [Doctors]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: ID do médico
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Doctor'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Dr. Carlos Souza
+ *               crm:
+ *                 type: string
+ *                 example: "123456"
+ *               specialties:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 example: [1, 2]
+ *               phone:
+ *                 type: string
+ *                 example: "+55 31 98765-4321"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: carlos@email.com
+ *               user_id:
+ *                 type: integer
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Médico atualizado com sucesso
+ *       400:
+ *         description: Dados inválidos
  *       404:
  *         description: Médico não encontrado
  */
-router.put('/:id', doctorController.updateDoctor);
+router.patch('/:id', doctorController.updateDoctor);
 
 /**
  * @swagger
@@ -241,6 +265,6 @@ router.put('/:id', doctorController.updateDoctor);
  *       404:
  *         description: Médico não encontrado
  */
-router.delete('/:id', checkRole([UserRole.ADMIN]), doctorController.deleteDoctor);
+router.delete('/:id', checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorController.deleteDoctor);
 
 export default router;
