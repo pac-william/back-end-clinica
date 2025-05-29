@@ -1,8 +1,9 @@
 import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
+import { DoctorDTO } from '../dtos/doctor.dto';
 import DoctorService from '../services/doctorService';
+import { ErrorResponse } from '../utils/ErrorResponse';
 import { QueryBuilder } from '../utils/QueryBuilder';
-import {DoctorDTO} from '../dtos/doctor.dto';
 
 const doctorService = new DoctorService();
 
@@ -22,10 +23,9 @@ class DoctorController {
         .build();
 
       const doctors = await doctorService.getAllDoctors(filters);
-
       res.json(doctors);
-    } catch (error: any) {
-      res.status(500).json({ error });
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno ao buscar médicos', error });
     }
   };
 
@@ -38,13 +38,15 @@ class DoctorController {
     try {
       const { id } = req.params;
       const doctor = await doctorService.getDoctorById(id);
-      if (!doctor) {
-        res.status(404).json({ error: 'Doctor not found' });
+
+      if (doctor instanceof ErrorResponse) {
+        res.status(doctor.statusCode).json(doctor);
         return;
       }
+
       res.json(doctor);
-    } catch (error: any) {
-      res.status(500).json({ error });
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno ao buscar médico', error });
     }
   };
 
@@ -55,31 +57,23 @@ class DoctorController {
    */
   createDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
-      DoctorDTO.parse(req.body);
-      const { name, crm, specialties, phone, email } = req.body;
+      const doctor = DoctorDTO.parse(req.body);
+      const created = await doctorService.createDoctor(doctor);
 
-      const doctor = await doctorService.createDoctor({ name, crm, specialties, phone, email });
-
-      if (!doctor?.success) {
-        res.status(400).json(doctor);
+      if (created instanceof ErrorResponse) {
+        res.status(created.statusCode).json(created);
         return;
       }
 
-      res.status(201).json({
-        doctor: doctor.data
-      });
-
-      return;
+      res.status(201).json({ doctor: created });
     } catch (err) {
       if (err instanceof ZodError) {
         res.status(400).json({
-          message: "invalid-request",
-          errors: err.issues
+          message: 'Requisição inválida',
+          errors: err.issues,
         });
       } else {
-        res.status(500).json({
-          errors: err
-        });
+        res.status(500).json({ message: 'Erro ao criar médico', error: err });
       }
     }
   };
@@ -91,28 +85,25 @@ class DoctorController {
    */
   updateDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
-      DoctorDTO.parse(req.body);
+      const doctor = DoctorDTO.parse(req.body);
       const { id } = req.params;
-      const { name, crm, specialties, phone, email } = req.body;
 
-      const doctor = await doctorService.updateDoctor(id, { name, crm, specialties, phone, email });
+      const updated = await doctorService.updateDoctor(id, doctor);
 
-      if (!doctor?.success) {
-        res.status(400).json(doctor);
+      if (updated instanceof ErrorResponse) {
+        res.status(updated.statusCode).json(updated);
         return;
       }
 
-      res.json(doctor);
+      res.json(updated);
     } catch (err) {
       if (err instanceof ZodError) {
         res.status(400).json({
-          message: "invalid-request",
-          errors: err.issues
+          message: 'Requisição inválida',
+          errors: err.issues,
         });
       } else {
-        res.status(500).json({
-          errors: err
-        });
+        res.status(500).json({ message: 'Erro ao atualizar médico', error: err });
       }
     }
   };
@@ -123,9 +114,19 @@ class DoctorController {
    * @param res Resposta HTTP confirmando a exclusão
    */
   deleteDoctor: RequestHandler = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    await doctorService.deleteDoctor(id);
-    res.json({ message: 'Doctor deleted successfully' });
+    try {
+      const { id } = req.params;
+      const result = await doctorService.deleteDoctor(id);
+
+      if (result instanceof ErrorResponse) {
+        res.status(result.statusCode).json(result);
+        return;
+      }
+
+      res.json({ message: 'Médico removido com sucesso' });
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao deletar médico', error });
+    }
   };
 }
 

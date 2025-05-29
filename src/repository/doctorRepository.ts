@@ -1,86 +1,188 @@
-import { Doctor, DoctorPaginatedResponse } from "models/doctor";
+import { DoctorPaginatedResponse } from "models/doctor";
 import db from "../database/connection";
+import { DoctorDTO } from "../dtos/doctor.dto";
 import { MetaBuilder } from "../utils/MetaBuilder";
 
 export class DoctorRepository {
-    async getAllDoctors(page: number, size: number, specialty?: number[], name?: string): Promise<DoctorPaginatedResponse> {
-        const offset = (page - 1) * size;
-        let queryDoctor = db('doctors');
-        let querySpecialty = db('specialty_doctor');
+  /**
+   * Retorna uma lista paginada de médicos com filtros opcionais por especialidade e nome.
+   * @param page Página atual
+   * @param size Quantidade de itens por página
+   * @param specialty Lista de IDs de especialidades
+   * @param name Nome parcial para busca
+   */
+  async getAllDoctors(
+    page: number,
+    size: number,
+    specialty?: number[],
+    name?: string
+  ): Promise<DoctorPaginatedResponse> {
+    const offset = (page - 1) * size;
+    let queryDoctor = db('doctors');
 
-        if (specialty && specialty.length > 0) {
-            const specialtyIds = specialty.map(Number);
-            querySpecialty = querySpecialty.whereIn('specialty_id', specialtyIds);
+    if (specialty && specialty.length > 0) {
+      const specialtyIds = specialty.map(Number);
 
-            const doctorIds = db('specialty_doctor')
-                .whereIn('specialty_id', specialtyIds)
-                .select('doctor_id');
+      const doctorIds = db('specialty_doctor')
+        .whereIn('specialty_id', specialtyIds)
+        .select('doctor_id');
 
-            queryDoctor = queryDoctor.whereIn('id', doctorIds);
+      queryDoctor = queryDoctor.whereIn('id', doctorIds);
+    }
+
+    if (name) {
+      queryDoctor = queryDoctor.whereRaw('LOWER(name) LIKE LOWER(?)', [`%${name}%`]);
+    }
+
+    const countResult = await queryDoctor.clone().count('id as count').first();
+    const total = countResult ? Number(countResult.count) : 0;
+
+    const doctors = await queryDoctor.offset(offset).limit(size);
+
+    const specialties = await db('doctor_specialties')
+      .join('specialties', 'specialties.id', 'doctor_specialties.specialty_id')
+      .whereIn('doctor_id', doctors.map(d => d.id))
+      .select('doctor_specialties.doctor_id', 'doctor_specialties.specialty_id', 'specialties.name as specialty_name');
+
+    return {
+      doctors: doctors.map(doctor => ({
+        ...doctor,
+        specialties: specialties
+          .filter(s => s.doctor_id === doctor.id)
+          .map(s => s.specialty_id)
+      })),
+      meta: new MetaBuilder(total, page, size).build()
+    };
+  }
+
+  /**
+   * Busca o primeiro médico com o CRM ou email informado.
+   * @param crm CRM do médico
+   * @param email Email do médico
+   */
+  async getFirstWhere(crm?: string, email?: string) {
+    return db('doctors')
+      .where('crm', crm)
+      .orWhere('email', email)
+      .first();
+  }
+
+  /**
+   * Retorna um médico pelo seu ID, incluindo suas especialidades.
+   * @param id ID do médico
+   */
+  async getDoctorById(id: string) {
+    try {
+      const doctor = await db('doctors').where('id', id).first();
+      const specialties = await db('doctor_specialties')
+        .join('specialties', 'specialties.id', 'doctor_specialties.specialty_id')
+        .where('doctor_id', id)
+        .select('doctor_specialties.doctor_id', 'doctor_specialties.specialty_id', 'specialties.name as specialty_name');
+
+      return {
+        ...doctor,
+        specialties: specialties.map(s => s.specialty_id)
+      };
+    } catch (error) {
+      console.error("Erro ao buscar médico:", error);
+      return {
+        message: "Erro ao buscar informações do médico",
+        error: {
+          errorType: error instanceof Error ? error.name : "Erro desconhecido",
+          errorMessage: error instanceof Error ? error.message : String(error),
+          errorLocation: "DoctorRepository.getDoctorById",
+          doctorId: id
         }
-
-        if (name) {
-            queryDoctor = queryDoctor.whereRaw('LOWER(name) LIKE LOWER(?)', [`%${name}%`]);
-        }
-
-        const countResult = await queryDoctor.clone().count('id as count').first();
-        const total = countResult ? Number(countResult.count) : 0;
-
-        const doctors = await queryDoctor.offset(offset).limit(size);
-
-        const specialties = await db('doctor_specialties')
-            .join('specialty', 'specialty.id', 'doctor_specialties.specialty_id')
-            .whereIn('doctor_id', doctors.map(doctor => doctor.id))
-            .select('doctor_specialties.doctor_id', 'doctor_specialties.specialty_id', 'specialty.name as specialty_name');
-
-        return {
-            doctors: doctors.map(doctor => ({
-                ...doctor,
-                specialties: specialties.filter(specialty => specialty.doctor_id === doctor.id).map(specialty => specialty.specialty_id)
-            })),
-            meta: new MetaBuilder(total, page, size).build()
-        };
+      };
     }
+  }
 
-    async getFirstWhere(crm?: string, email?: string) {
-        return db('doctors').where('crm', crm).orWhere('email', email).first();
-    }
+  /**
+   * Cria um médico sem especialidades.
+   * @param doctor Objeto com os dados do médico
+   */
+  async createDoctor(doctor: Omit<DoctorDTO, 'specialties'>) {
+    return db('doctors').insert(doctor).returning('*');
+  }
 
-    async getDoctorById(id: string) {
-        try {
-            const doctor = await db('doctors').where('id', id).first();
-            const specialties = await db('doctor_specialties')
-                .join('specialty', 'specialty.id', 'doctor_specialties.specialty_id')
-                .where('doctor_id', id)
-                .select('doctor_specialties.doctor_id', 'doctor_specialties.specialty_id', 'specialty.name as specialty_name');
+  /**
+   * Cria um médico e relaciona suas especialidades em transação.
+   * @param doctor DTO com dados do médico
+   */
+  async createDoctorWithSpecialties(doctor: DoctorDTO) {
+    return db.transaction(async (trx) => {
+      const [doctorResult] = await trx('doctors').insert({
+        name: doctor.name,
+        crm: doctor.crm,
+        phone: doctor.phone || '',
+        email: doctor.email,
+      }).returning('*');
 
-            return {
-                ...doctor,
-                specialties: specialties.map(specialty => specialty.specialty_id)
-            };
-        } catch (error) {
-            console.error("Erro ao buscar médico:", error);
-            return {
-                message: "Erro ao buscar informações do médico",
-                error: {
-                    errorType: error instanceof Error ? error.name : "Erro desconhecido",
-                    errorMessage: error instanceof Error ? error.message : String(error),
-                    errorLocation: "DoctorRepository.getDoctorById",
-                    doctorId: id
-                }
-            };
-        }
-    }
+      if (doctor.specialties.length > 0) {
+        const specialtyRelations = doctor.specialties.map(specialtyId => ({
+          doctor_id: doctorResult.id,
+          specialty_id: specialtyId
+        }));
 
-    async createDoctor(doctor: Doctor) {
-        return db('doctors').insert(doctor);
-    }
+        await trx('doctor_specialties').insert(specialtyRelations);
+      }
 
-    async updateDoctor(id: string, doctor: Doctor) {
-        return db('doctors').where('id', id).update(doctor).returning('*');
-    }
+      return {
+        ...doctorResult,
+        specialties: doctor.specialties
+      };
+    });
+  }
 
-    async deleteDoctor(id: string) {
-        return db('doctors').where('id', id).delete();
-    }
+  /**
+   * Atualiza os dados de um médico sem alterar suas especialidades.
+   * @param id ID do médico
+   * @param doctor Objeto com os novos dados
+   */
+  async updateDoctor(id: string, doctor: Omit<DoctorDTO, 'specialties'>) {
+    return db('doctors').where('id', id).update(doctor).returning('*');
+  }
+
+  /**
+   * Atualiza os dados e especialidades de um médico em transação.
+   * @param id ID do médico
+   * @param doctor DTO com os dados atualizados
+   */
+  async updateDoctorWithSpecialties(id: string, doctor: DoctorDTO) {
+    return db.transaction(async (trx) => {
+      const [updatedDoctor] = await trx('doctors')
+        .where('id', id)
+        .update({
+          name: doctor.name,
+          crm: doctor.crm,
+          phone: doctor.phone,
+          email: doctor.email,
+        })
+        .returning('*');
+
+      await trx('doctor_specialties').where('doctor_id', id).delete();
+
+      if (doctor.specialties.length > 0) {
+        const specialtyRelations = doctor.specialties.map(specialtyId => ({
+          doctor_id: id,
+          specialty_id: specialtyId
+        }));
+
+        await trx('doctor_specialties').insert(specialtyRelations);
+      }
+
+      return {
+        ...updatedDoctor,
+        specialties: doctor.specialties
+      };
+    });
+  }
+
+  /**
+   * Remove um médico do sistema.
+   * @param id ID do médico
+   */
+  async deleteDoctor(id: string) {
+    return db('doctors').where('id', id).delete();
+  }
 }

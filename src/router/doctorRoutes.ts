@@ -155,9 +155,11 @@ router.get('/:id', doctorController.getDoctorById);
  *               name:
  *                 type: string
  *                 example: Dr. Carlos Souza
+ *                 description: Nome deve ter pelo menos 3 caracteres
  *               crm:
  *                 type: string
  *                 example: "123456"
+ *                 description: CRM deve ter pelo menos 4 caracteres
  *               specialties:
  *                 type: array
  *                 items:
@@ -171,12 +173,13 @@ router.get('/:id', doctorController.getDoctorById);
  *                 type: string
  *                 format: email
  *                 example: carlos@email.com
+ *               user_id:
+ *                 type: integer
+ *                 example: 1
  *             required:
  *               - name
  *               - crm
  *               - specialties
- *               - phone
- *               - email
  *     responses:
  *       201:
  *         description: Médico criado com sucesso

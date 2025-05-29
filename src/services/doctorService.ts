@@ -1,100 +1,85 @@
-import { DoctorDTO } from 'dtos/doctor.dto';
-import { DoctorPaginatedResponse } from 'models/doctor';
-import db from '../database/connection';
+import { DoctorDTO } from '../dtos/doctor.dto';
+import { DoctorPaginatedResponse } from '../models/doctor';
 import { DoctorRepository } from '../repository/doctorRepository';
 import { SpecialtyRepository } from '../repository/specialtyRepository';
+import { ErrorResponse } from '../utils/ErrorResponse';
+import Utils from '../utils/utils';
+
 const doctorRepository = new DoctorRepository();
 const specialtyRepository = new SpecialtyRepository();
 
 class DoctorService {
-  async getAllDoctors(filters: { page: number; size: number; specialty?: number[]; name?: string }): Promise<DoctorPaginatedResponse> {
-    const { page, size, specialty, name } = filters;
-    const doctors = await doctorRepository.getAllDoctors(page, size, specialty, name);
-    return doctors
-  }
-
-  async getDoctorById(id: string) {
-    const doctor = await doctorRepository.getDoctorById(id);
-    if (!doctor) return null;
-
-    return doctor;
-  }
-
-  async createDoctor(doctor: any): Promise<any> {
-    const existing = await doctorRepository.getFirstWhere(doctor.crm, doctor.email);
-
-    if (existing) {
-      const errors: Record<string, string[]> = {};
-      if (existing.crm === doctor.crm) errors.crm = ['CRM already registered'];
-      if (existing.email === doctor.email) errors.email = ['Email already registered'];
-      return {
-        success: false,
-        data: errors,
-      };
-    }
-
-    const existingSpecialties = await specialtyRepository.getSpecialtiesByIds(doctor.specialties)
-
-    if (existingSpecialties.length !== doctor.specialties.length) {
-      return {
-        success: false,
-        data: {
-          specialties: ['Uma ou mais especialidades não existem']
-        }
-      };
-    }
-
+  async getAllDoctors(filters: { page: number; size: number; specialty?: number[]; name?: string }): Promise<DoctorPaginatedResponse | ErrorResponse> {
     try {
-      // Inserir médico com array de IDs de especialidades
-      const [doctorResult] = await db('doctors').insert({
-        name: doctor.name,
-        crm: doctor.crm,
-        phone: doctor.phone,
-        email: doctor.email,
-        specialties_ids: doctor.specialties // Salvar os IDs diretamente no campo array
-      }).returning('*');
-
-      return {
-        success: true,
-        data: {
-          ...doctorResult,
-          specialties: existingSpecialties
-        }
-      };
+      const { page, size, specialty, name } = filters;
+      const doctors = await doctorRepository.getAllDoctors(page, size, specialty, name);
+      return doctors;
     } catch (error) {
-      throw error;
+      return new ErrorResponse('Erro ao buscar médicos', 500).log(error as Error);
     }
   }
 
-  async updateDoctor(id: string, doctor: DoctorDTO): Promise<{ success: boolean; doctor: DoctorDTO }> {
+  async getDoctorById(id: string): Promise<DoctorDTO | ErrorResponse> {
+    try {
+      const doctor = await doctorRepository.getDoctorById(id);
+      if (!doctor) {
+        return new ErrorResponse('Médico não encontrado', 404);
+      }
+      return doctor;
+    } catch (error) {
+      return new ErrorResponse('Erro ao buscar o médico', 500).log(error as Error);
+    }
+  }
+
+  async createDoctor(doctor: DoctorDTO): Promise<DoctorDTO | ErrorResponse> {
+    try {
+      const existing = await doctorRepository.getFirstWhere(doctor.crm, doctor.email);
+
+      if (existing) {
+        if (existing.crm === doctor.crm) {
+          return new ErrorResponse("Um médico com este CRM já existe", 400);
+        }
+        if (existing.email === doctor.email) {
+          return new ErrorResponse("Um médico com este email já existe", 400);
+        }
+        return new ErrorResponse('Dados inválidos', 400);
+      }
+
+      doctor.phone = Utils.formatPhone(doctor.phone);
+
+      const existingSpecialties = await specialtyRepository.getSpecialtiesByIds(doctor.specialties);
+
+      if (existingSpecialties.length !== doctor.specialties.length) {
+        return new ErrorResponse('Uma ou mais especialidades não existem', 400);
+      }
+
+      return await doctorRepository.createDoctorWithSpecialties(doctor);
+    } catch (error) {
+      return new ErrorResponse('Erro ao criar o médico', 500).log(error as Error);
+    }
+  }
+
+  async updateDoctor(id: string, doctor: DoctorDTO): Promise<DoctorDTO | ErrorResponse> {
     try {
       const existingSpecialties = await specialtyRepository.getSpecialtiesByIds(doctor.specialties);
 
       if (existingSpecialties.length !== doctor.specialties.length) {
-        throw new Error('Uma ou mais especialidades não existem');
+        return new ErrorResponse('Uma ou mais especialidades não existem', 400);
       }
 
-      const dataToUpdate = {
-        name: doctor.name,
-        crm: doctor.crm,
-        phone: doctor.phone,
-        email: doctor.email,
-        specialties: existingSpecialties,
-      }
-
-      const [updatedDoctor] = await doctorRepository.updateDoctor(id, dataToUpdate);
-
-      return {
-        success: true,
-        doctor: updatedDoctor,
-      }
+      const updatedDoctor = await doctorRepository.updateDoctorWithSpecialties(id, doctor);
+      return updatedDoctor;
     } catch (error) {
-      throw error;
+      return new ErrorResponse('Erro ao atualizar o médico', 500).log(error as Error);
     }
   }
 
-  async deleteDoctor(id: string) {
-    await doctorRepository.deleteDoctor(id);
+  async deleteDoctor(id: string): Promise<void | ErrorResponse> {
+    try {
+      await doctorRepository.deleteDoctor(id);
+    } catch (error) {
+      return new ErrorResponse('Erro ao deletar o médico', 500).log(error as Error);
+    }
   }
 }
 
