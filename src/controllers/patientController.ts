@@ -7,6 +7,12 @@ import { ZodError } from 'zod';
 const patientService = new PatientService();
 
 class PatientController {
+  /**
+   * Lista pacientes com filtros e paginação.
+   * @param req Requisição HTTP
+   * @param res Resposta HTTP
+   * @returns Lista de pacientes
+   */
   getAllPatients: RequestHandler = async (req: Request, res: Response) => {
     try {
       const { page, size, name, email, phone } = QueryBuilder.from(req.query)
@@ -23,6 +29,12 @@ class PatientController {
     }
   };
 
+  /**
+   * Busca um paciente pelo id.
+   * @param req Requisição HTTP (deve conter o id nos parâmetros)
+   * @param res Resposta HTTP
+   * @returns O paciente encontrado ou 404 se não existir
+   */
   getPatientById: RequestHandler = async (req: Request, res: Response): Promise<any> => {
     try {
       const { id } = req.params;
@@ -36,6 +48,12 @@ class PatientController {
     }
   };
 
+  /**
+   * Cria um novo paciente.
+   * @param req Requisição HTTP (deve conter os dados do paciente no body)
+   * @param res Resposta HTTP
+   * @returns O paciente criado ou erro de validação
+   */
   createPatient: RequestHandler = async (req: Request, res: Response) => {
     try {
       const body = patientDTO.parse(req.body);
@@ -63,6 +81,12 @@ class PatientController {
     }
   };
 
+  /**
+   * Atualiza os dados de um paciente existente.
+   * @param req Requisição HTTP (deve conter o id nos parâmetros e os dados no body)
+   * @param res Resposta HTTP
+   * @returns O paciente atualizado ou 404 se não existir
+   */
   updatePatient: RequestHandler = async (req: Request, res: Response): Promise<any> => {
     try {
       const { id } = req.params;
@@ -77,6 +101,12 @@ class PatientController {
     }
   };
 
+  /**
+   * Remove um paciente pelo id.
+   * @param req Requisição HTTP (deve conter o id nos parâmetros)
+   * @param res Resposta HTTP
+   * @returns Mensagem de sucesso ou erro
+   */
   deletePatient: RequestHandler = async (req: Request, res: Response): Promise<any> => {
     try {
       const { id } = req.params;
