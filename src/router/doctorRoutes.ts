@@ -256,14 +256,24 @@ router.patch('/:id', checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorControl
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: ID do médico
+ *       - in: query
+ *         name: active
+ *         schema:
+ *           type: boolean
+ *         required: true
+ *         description: Status de ativação (true/false)
  *     responses:
  *       200:
- *         description: Médico ativado com sucesso
+ *         description: Médico ativado/desativado com sucesso
+ *       400:
+ *         description: Dados inválidos
  *       404:
  *         description: Médico não encontrado
+ *       500:
+ *         description: Erro ao ativar/desativar médico
  */
 router.patch('/:id/active', checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorController.activeDoctor);
 
