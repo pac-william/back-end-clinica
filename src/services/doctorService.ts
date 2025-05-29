@@ -79,6 +79,14 @@ class DoctorService {
     }
   }
 
+  async activeDoctor(id: string, active: boolean): Promise<void | ErrorResponse> {
+    try {
+      await doctorRepository.updateDoctorActive(id, active);
+    } catch (error) {
+      return new ErrorResponse('Erro ao ativar/desativar o médico', 500).log(error as Error);
+    }
+  }
+
   async deleteDoctor(id: string): Promise<void | ErrorResponse> {
     try {
       await doctorRepository.deleteDoctor(id);

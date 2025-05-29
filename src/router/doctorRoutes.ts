@@ -193,7 +193,7 @@ router.get('/:id', doctorController.getDoctorById);
  *       400:
  *         description: Dados inválidos
  */
-router.post('/', doctorController.createDoctor);
+router.post('/', checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorController.createDoctor);
 
 /**
  * @swagger
@@ -244,7 +244,28 @@ router.post('/', doctorController.createDoctor);
  *       404:
  *         description: Médico não encontrado
  */
-router.patch('/:id', doctorController.updateDoctor);
+router.patch('/:id', checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorController.updateDoctor);
+
+/**
+ * @swagger
+ * /api/v1/doctors/{id}/active:
+ *   patch:
+ *     summary: Ativa ou desativa um médico
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID do médico
+ *     responses:
+ *       200:
+ *         description: Médico ativado com sucesso
+ *       404:
+ *         description: Médico não encontrado
+ */
+router.patch('/:id/active', checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorController.activeDoctor);
 
 /**
  * @swagger
@@ -265,6 +286,6 @@ router.patch('/:id', doctorController.updateDoctor);
  *       404:
  *         description: Médico não encontrado
  */
-router.delete('/:id', checkRole([UserRole.ADMIN, UserRole.MASTER]), doctorController.deleteDoctor);
+router.delete('/:id', checkRole([UserRole.MASTER]), doctorController.deleteDoctor);
 
 export default router;

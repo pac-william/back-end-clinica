@@ -205,6 +205,15 @@ export class DoctorRepository {
   }
 
   /**
+   * Ativa ou desativa um médico.
+   * @param id ID do médico
+   * @param active Valor booleano para ativar ou desativar o médico
+   */
+  async updateDoctorActive(id: string, active: boolean) {
+    return db('doctors').where('id', id).update({ active });
+  }
+
+  /**
    * Remove um médico do sistema.
    * @param id ID do médico
    */

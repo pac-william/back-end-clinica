@@ -109,6 +109,30 @@ class DoctorController {
   };
 
   /**
+   * Ativa ou desativa um médico existente.
+   * @param req Requisição HTTP contendo o id do médico nos parâmetros
+   * @param res Resposta HTTP com o médico ativado ou erros de validação
+   */
+  activeDoctor: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { active } = new QueryBuilder(req.query).withBoolean('active', true).build();
+
+      const result = await doctorService.activeDoctor(id, active);
+
+      if (result instanceof ErrorResponse) {
+        res.status(result.statusCode).json(result);
+        return;
+      }
+
+      res.json({ message: 'Médico ativado com sucesso' });
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao ativar/desativar médico', error });
+    }
+  };
+
+
+  /**
    * Remove um médico do sistema pelo seu id.
    * @param req Requisição HTTP contendo o id do médico nos parâmetros
    * @param res Resposta HTTP confirmando a exclusão
