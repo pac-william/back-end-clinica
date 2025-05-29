@@ -16,7 +16,31 @@ class UserService {
   }
 
   async createUser({ email, password, role }: z.infer<typeof userDTO>, token?: string): Promise<any> {
-    if (role !== 'USER') {
+    if (!email) {
+      return {
+        success: false,
+        data: {
+          email: ['Email é obrigatório'],
+        },
+      };
+    }
+
+    if (!password) {
+      return {
+        success: false,
+        data: {
+          password: ['Senha é obrigatória'],
+        },
+      };
+    }
+
+    if (!role) {
+      role = 'USER';
+    }
+
+    if (role === 'USER') {
+      // Continua sem verificar o token
+    } else {
       if (!token) {
         throw new Error('Token não fornecido');
       }
@@ -41,16 +65,21 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await userRepository.createUser({
-      email,
-      password: hashedPassword,
-      role: role,
-    });
+    try {
+      const user = await userRepository.createUser({
+        email,
+        password: hashedPassword,
+        role: role,
+      });
 
-    return {
-      success: true,
-      data: user,
-    };
+      return {
+        success: true,
+        data: user,
+      };
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      throw new Error('Falha ao criar usuário');
+    }
   }
 
   async login({ email, password }: z.infer<typeof loginDTO>): Promise<any> {

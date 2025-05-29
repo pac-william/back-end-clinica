@@ -1,4 +1,4 @@
-type Role = 'DOCTOR' | 'SECRETARY' | 'PATIENT';
+type Role = 'USER' | 'ADMIN' | 'MASTER';
 
 export interface User {
   id: number;

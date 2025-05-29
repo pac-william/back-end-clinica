@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     table.increments('id').primary();
     table.string('email').notNullable().unique();
     table.string('password').notNullable();
-    table.enu('role', ['ADMIN', 'DOCTOR', 'SECRETARY', 'PATIENT'], {
+    table.enu('role', ['USER', 'ADMIN', 'MASTER'], {
       useNative: true,
       enumName: 'user_role'
     }).notNullable();

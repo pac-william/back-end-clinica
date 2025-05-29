@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import UserController from "../controllers/userController";
 import { authMiddleware } from "../middleware/auth.middleware";
 
@@ -9,9 +9,60 @@ const userController = new UserController();
  * @swagger
  * /api/v1/users/create:
  *   post:
- *     summary: Cria um novo usuário
+ *     summary: Registra um novo usuário comum (role USER)
  *     tags: [Usuários]
  *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email do usuário
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Senha do usuário
+ *     responses:
+ *       201:
+ *         description: Usuário criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       400:
+ *         description: Dados inválidos
+ *       500:
+ *         description: Erro no servidor
+ */
+router.post('/create', (req: Request, res: Response, next: NextFunction) => {
+  // Força a role como USER
+  req.body.role = 'USER';
+  return userController.createUser(req, res, next);
+});
+
+/**
+ * @swagger
+ * /api/v1/users/create-with-privilege:
+ *   post:
+ *     summary: Cria um novo usuário (requer autenticação para roles ADMIN/MASTER)
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -50,10 +101,14 @@ const userController = new UserController();
  *                   type: string
  *       400:
  *         description: Dados inválidos
+ *       401:
+ *         description: Não autorizado
+ *       403:
+ *         description: Acesso proibido
  *       500:
  *         description: Erro no servidor
  */
-router.post('/create', userController.createUser);
+router.post('/create-with-privilege', authMiddleware, userController.createUser);
 
 /**
  * @swagger

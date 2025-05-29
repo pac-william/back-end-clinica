@@ -1,5 +1,5 @@
-import { userDTO } from 'dtos/user.dto';
 import { Request, RequestHandler, Response } from 'express';
+import { userDTO } from '../dtos/user.dto';
 import UserService from '../services/userService';
 import { QueryBuilder } from '../utils/QueryBuilder';
 
@@ -25,9 +25,21 @@ class UserController {
 
     createUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
+            // Se role não for fornecida, define como 'USER' por padrão
+            if (!req.body.role) {
+                req.body.role = 'USER';
+            }
+            
             req.body = userDTO.parse(req.body);
             const { email, password, role } = req.body;
             const token = req.headers.authorization?.split(' ')[1];
+            
+            // Se for criar um usuário normal e não tiver token, prossegue sem token
+            if (role === 'USER' && !token) {
+                const user = await userService.createUser({ email, password, role });
+                res.status(201).json(user);
+                return;
+            }
             
             const user = await userService.createUser({ email, password, role }, token);
             res.status(201).json(user);
@@ -39,7 +51,7 @@ class UserController {
             } else if (error.message === 'Token inválido') {
                 res.status(401).json({ error: error.message });
             } else {
-                res.status(400).json({ error: 'Falha ao criar usuário' });
+                res.status(400).json({ error: error.message || 'Falha ao criar usuário' });
             }
         }
     };

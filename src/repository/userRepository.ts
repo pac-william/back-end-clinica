@@ -1,6 +1,6 @@
-import { userDTO } from "dtos/user.dto";
 import { z } from "zod";
 import db from "../database/connection";
+import { userDTO } from "../dtos/user.dto";
 import { User } from "../models/user";
 import { MetaBuilder } from "../utils/MetaBuilder";
 
@@ -43,15 +43,31 @@ export class UserRepository {
     }
 
     async createUser(userData: z.infer<typeof userDTO>) {
-        const [user] = await db('users')
-            .insert({
-                email: userData.email,
-                password: userData.password,
-                role: userData.role,
-            })
-            .returning(['id', 'email', 'role']);
-
-        return user;
+        try {
+            if (!userData.email) {
+                throw new Error('Email é obrigatório');
+            }
+            
+            if (!userData.password) {
+                throw new Error('Senha é obrigatória');
+            }
+            
+            if (!userData.role) {
+                userData.role = 'USER';
+            }
+            
+            const [user] = await db('users')
+                .insert({
+                    email: userData.email,
+                    password: userData.password,
+                    role: userData.role
+                })
+                .returning(['id', 'email', 'role']);
+            
+            return user;
+        } catch (error) {
+            throw new Error(`Erro ao criar usuário: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+        }
     }
 
     async updateUser(id: number, userData: Partial<User>) {

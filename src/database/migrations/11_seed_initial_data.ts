@@ -1,6 +1,17 @@
+import bcrypt from 'bcrypt';
 import type { Knex } from "knex";
 
+const masterEmail = process.env.MASTER_EMAIL;
+const masterPassword = process.env.MASTER_PASSWORD;
+
 export async function up(knex: Knex): Promise<void> {
+
+  if (!masterPassword) {
+    throw new Error('MASTER_PASSWORD deve ser definido no arquivo .env');
+  }
+
+  const masterPasswordHash = await bcrypt.hash(masterPassword, 10);
+
   await knex('specialty').insert([
     { name: 'Cardiologia' },
     { name: 'Dermatologia' },
@@ -13,15 +24,15 @@ export async function up(knex: Knex): Promise<void> {
     { name: 'Psiquiatria' },
     { name: 'Urologia' }
   ]);
-  
+
   await knex('users').insert({
-    email: 'admin@clinica.com',
-    password: '$2b$10$X7GjSSK8Uzw3Xa0Uw/Vl4eSZ86GgEQXJJgRUk3fQdKMpfvEEHzg.m',
-    role: 'ADMIN'
+    email: masterEmail,
+    password: masterPasswordHash,
+    role: 'MASTER'
   });
 }
 
 export async function down(knex: Knex): Promise<void> {
   await knex('specialty').del();
-  await knex('users').where({ email: 'admin@clinica.com' }).del();
+  await knex('users').where({ email: masterEmail }).del();
 } 
