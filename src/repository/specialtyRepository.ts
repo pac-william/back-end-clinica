@@ -26,7 +26,7 @@ export class SpecialtyRepository {
     }
 
     async getSpecialtiesByIds(ids: number[]) {
-        return db('specialties').whereIn('id', ids);
+        return db('specialties').whereIn('id', ids).returning('*');
     }
 
     async createSpecialty(specialty: Specialty) {
