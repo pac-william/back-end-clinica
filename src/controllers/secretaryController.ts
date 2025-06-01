@@ -6,7 +6,14 @@ import SecretaryService from '../services/secretarysService';
 
 const secretaryService = new SecretaryService();
 
+// Controller responsável pelas operações relacionadas às secretárias
 class SecretaryController {
+    /**
+     * Cria uma nova secretária.
+     * @param req Requisição HTTP (deve conter os dados da secretária no body)
+     * @param res Resposta HTTP
+     * @returns A secretária criada ou erro de validação
+     */
     create: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
             const secretaryBody = secretaryDTO.parse(req.body) as Secretary;
@@ -36,6 +43,12 @@ class SecretaryController {
         }
     };
 
+    /**
+     * Lista secretárias com filtros e paginação.
+     * @param req Requisição HTTP (deve conter os parâmetros de paginação e filtros)
+     * @param res Resposta HTTP
+     * @returns Lista de secretárias
+     */
     getAll: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
