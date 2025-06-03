@@ -1,14 +1,14 @@
 import { Request, RequestHandler, Response } from 'express';
 import { userDTO } from '../dtos/user.dto';
 import UserService from '../services/userService';
-import { QueryBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryBuilder';
 
 const userService = new UserService();
 
 class UserController {
     getAllUsers: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { page, limit, email, role } = QueryBuilder.from(req.query)
+            const { page, limit, email, role } = QueryParamsBuilder.from(req.query)
                 .withNumber('page', 1)
                 .withNumber('limit', 10)
                 .withString('email')

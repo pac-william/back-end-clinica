@@ -1,18 +1,18 @@
-export class QueryBuilder<TQuery extends Record<string, any> = {}> {
+export class QueryParamsBuilder<TQuery extends Record<string, any> = {}> {
     private query: Record<string, any>;
 
     constructor(query: Record<string, any>) {
         this.query = { ...query };
     }
 
-    static from<TQuery extends Record<string, any>>(query: TQuery): QueryBuilder<TQuery> {
-        return new QueryBuilder(query);
+    static from<TQuery extends Record<string, any>>(query: TQuery): QueryParamsBuilder<TQuery> {
+        return new QueryParamsBuilder(query);
     }
 
     withNumber<K extends string, V extends number | undefined = number | undefined>(
         key: K,
         defaultValue?: V
-    ): QueryBuilder<TQuery & { [P in K]: number | V }> {
+    ): QueryParamsBuilder<TQuery & { [P in K]: number | V }> {
         const value = Number(this.query[key]);
         this.query[key] = !isNaN(value) ? value : defaultValue;
         return this as any;
@@ -21,7 +21,7 @@ export class QueryBuilder<TQuery extends Record<string, any> = {}> {
     withString<K extends string, V extends string | undefined = string | undefined>(
         key: K,
         defaultValue?: V
-    ): QueryBuilder<TQuery & { [P in K]: string | V }> {
+    ): QueryParamsBuilder<TQuery & { [P in K]: string | V }> {
         const value = this.query[key];
         this.query[key] = typeof value === 'string' ? value : defaultValue;
         return this as any;
@@ -30,7 +30,7 @@ export class QueryBuilder<TQuery extends Record<string, any> = {}> {
     withBoolean<K extends string, V extends boolean | undefined = boolean | undefined>(
         key: K,
         defaultValue?: V
-    ): QueryBuilder<TQuery & { [P in K]: boolean | V }> {
+    ): QueryParamsBuilder<TQuery & { [P in K]: boolean | V }> {
         const value = this.query[key];
         this.query[key] =
             value === 'true' || value === true
@@ -44,7 +44,7 @@ export class QueryBuilder<TQuery extends Record<string, any> = {}> {
     withArray<K extends string, V extends any[] | undefined = any[] | undefined>(
         key: K,
         defaultValue?: V
-    ): QueryBuilder<TQuery & { [P in K]: any[] | V }> {
+    ): QueryParamsBuilder<TQuery & { [P in K]: any[] | V }> {
         const value = this.query[key];
         
         if (Array.isArray(value)) {

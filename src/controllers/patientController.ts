@@ -1,8 +1,8 @@
 import { Request, RequestHandler, Response } from 'express';
-import PatientService from '../services/patientService';
-import { QueryBuilder } from '../utils/QueryBuilder';
-import { patientDTO } from '../dtos/patient.dto';
 import { ZodError } from 'zod';
+import { patientDTO } from '../dtos/patient.dto';
+import PatientService from '../services/patientService';
+import { QueryParamsBuilder } from '../utils/QueryBuilder';
 
 const patientService = new PatientService();
 
@@ -15,7 +15,7 @@ class PatientController {
    */
   getAllPatients: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const { page, size, name, email, phone } = QueryBuilder.from(req.query)
+      const { page, size, name, email, phone } = QueryParamsBuilder.from(req.query)
         .withNumber('page', 1)
         .withNumber('size', 10)
         .withString('name')

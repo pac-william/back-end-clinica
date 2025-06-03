@@ -1,7 +1,7 @@
 import { log } from 'console';
 import { Request, RequestHandler, Response } from 'express';
 import MedicalRecordService from '../services/medicalRecordService';
-import { QueryBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryBuilder';
 
 const medicalRecordService = new MedicalRecordService();
 
@@ -33,7 +33,7 @@ class MedicalController {
 
   getMedicalRecords: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { page, size } = QueryBuilder.from(req.query)
+    const { page, size } = QueryParamsBuilder.from(req.query)
       .withNumber('page', 1)
       .withNumber('size', 10)
       .build();

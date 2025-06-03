@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 import { DoctorDTO } from '../dtos/doctor.dto';
 import DoctorService from '../services/doctorService';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { QueryBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryBuilder';
 
 const doctorService = new DoctorService();
 
@@ -15,7 +15,7 @@ class DoctorController {
    */
   getAllDoctors: RequestHandler = async (req: Request, res: Response) => {
     try {
-      const filters = QueryBuilder.from(req.query)
+      const filters = QueryParamsBuilder.from(req.query)
         .withNumber('page', 1)
         .withNumber('size', 10)
         .withArray('specialty')
@@ -116,7 +116,7 @@ class DoctorController {
   activeDoctor: RequestHandler = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const { active } = new QueryBuilder(req.query).withBoolean('active', true).build();
+      const { active } = new QueryParamsBuilder(req.query).withBoolean('active', true).build();
 
       const result = await doctorService.activeDoctor(id, active);
 
