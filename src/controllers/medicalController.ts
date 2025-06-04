@@ -6,6 +6,12 @@ import { QueryParamsBuilder } from '../utils/QueryBuilder';
 const medicalRecordService = new MedicalRecordService();
 
 class MedicalController {
+  /**
+   * Cria um novo prontuário médico para um paciente.
+   * @param req Requisição HTTP contendo id do médico, id do paciente e descrição do prontuário.
+   * @param res Resposta HTTP.
+   * @returns Retorna o prontuário criado ou um erro caso falhe.
+   */
   newMedicalRecord: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { patientId, description } = req.body;
@@ -31,6 +37,12 @@ class MedicalController {
     }
   };
 
+  /**
+   * Lista os prontuários médicos de um médico com paginação.
+   * @param req Requisição HTTP contendo id do médico e parâmetros de paginação (page, size).
+   * @param res Resposta HTTP.
+   * @returns Retorna a lista de prontuários e metadados de paginação.
+   */
   getMedicalRecords: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { page, size } = QueryParamsBuilder.from(req.query)
@@ -66,6 +78,12 @@ class MedicalController {
     }
   };
 
+  /**
+   * Busca um prontuário médico específico pelo seu id.
+   * @param req Requisição HTTP contendo o id do prontuário.
+   * @param res Resposta HTTP.
+   * @returns Retorna o prontuário encontrado ou erro caso não exista.
+   */
   getMedicalRecordById: RequestHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
 
