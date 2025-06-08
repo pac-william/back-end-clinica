@@ -1,14 +1,28 @@
+// Classe para construção e validação de parâmetros de consulta
 export class QueryParamsBuilder<TQuery extends Record<string, any> = {}> {
     private query: Record<string, any>;
 
+    /**
+     * Cria uma nova instância do construtor de parâmetros
+     * @param query Parâmetros de consulta originais
+     */
     constructor(query: Record<string, any>) {
         this.query = { ...query };
     }
 
+    /**
+     * Cria uma nova instância a partir de um objeto de consulta
+     * @param query Objeto de consulta
+     */
     static from<TQuery extends Record<string, any>>(query: TQuery): QueryParamsBuilder<TQuery> {
         return new QueryParamsBuilder(query);
     }
 
+    /**
+     * Adiciona um parâmetro numérico
+     * @param key Nome do parâmetro
+     * @param defaultValue Valor padrão (opcional)
+     */
     withNumber<K extends string, V extends number | undefined = number | undefined>(
         key: K,
         defaultValue?: V
@@ -18,6 +32,11 @@ export class QueryParamsBuilder<TQuery extends Record<string, any> = {}> {
         return this as any;
     }
 
+    /**
+     * Adiciona um parâmetro de texto
+     * @param key Nome do parâmetro
+     * @param defaultValue Valor padrão (opcional)
+     */
     withString<K extends string, V extends string | undefined = string | undefined>(
         key: K,
         defaultValue?: V
@@ -27,6 +46,11 @@ export class QueryParamsBuilder<TQuery extends Record<string, any> = {}> {
         return this as any;
     }
 
+    /**
+     * Adiciona um parâmetro booleano
+     * @param key Nome do parâmetro
+     * @param defaultValue Valor padrão (opcional)
+     */
     withBoolean<K extends string, V extends boolean | undefined = boolean | undefined>(
         key: K,
         defaultValue?: V
@@ -41,6 +65,11 @@ export class QueryParamsBuilder<TQuery extends Record<string, any> = {}> {
         return this as any;
     }
 
+    /**
+     * Adiciona um parâmetro array
+     * @param key Nome do parâmetro
+     * @param defaultValue Valor padrão (opcional)
+     */
     withArray<K extends string, V extends any[] | undefined = any[] | undefined>(
         key: K,
         defaultValue?: V
@@ -58,6 +87,9 @@ export class QueryParamsBuilder<TQuery extends Record<string, any> = {}> {
         return this as any;
     }
 
+    /**
+     * Constrói o objeto final com os parâmetros processados
+     */
     build(): TQuery {
         return this.query as TQuery;
     }

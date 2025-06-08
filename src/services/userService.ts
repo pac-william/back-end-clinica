@@ -10,11 +10,28 @@ const TOKEN_EXPIRATION = '1d';
 
 const userRepository = new UserRepository();
 
+// Service responsável pelas operações de negócio relacionadas aos usuários
 class UserService {
+  /**
+   * Lista usuários com filtros e paginação.
+   * @param page Número da página
+   * @param limit Tamanho da página
+   * @param email Email do usuário (opcional)
+   * @param role Papel do usuário (opcional)
+   * @returns Lista paginada de usuários
+   */
   async getAllUsers(page: number = 1, limit: number = 10, email?: string, role?: string) {
     return userRepository.getAllUsers(page, limit, email, role);
   }
 
+  /**
+   * Cria um novo usuário.
+   * @param email Email do usuário
+   * @param password Senha do usuário
+   * @param role Papel do usuário (opcional)
+   * @param token Token de autenticação (opcional)
+   * @returns O usuário criado ou erro de validação
+   */
   async createUser({ email, password, role }: z.infer<typeof userDTO>, token?: string): Promise<any> {
     if (!email) {
       return {
@@ -82,6 +99,12 @@ class UserService {
     }
   }
 
+  /**
+   * Realiza o login de um usuário.
+   * @param email Email do usuário
+   * @param password Senha do usuário
+   * @returns Token de autenticação ou erro de login
+   */
   async login({ email, password }: z.infer<typeof loginDTO>): Promise<any> {
     const user = await userRepository.getUserByEmail(email);
 
