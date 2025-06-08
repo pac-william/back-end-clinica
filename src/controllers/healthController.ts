@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 
+// Controller responsável pelas operações de verificação de saúde da aplicação
 export class HealthController {
+    /**
+     * Realiza uma verificação básica de saúde da aplicação.
+     * @param req Requisição HTTP
+     * @param res Resposta HTTP
+     * @returns Status da aplicação, tempo de atividade e uso de memória
+     */
     async basicCheck(req: Request, res: Response) {
         try {
             const memoryUsage = process.memoryUsage();
@@ -26,6 +33,12 @@ export class HealthController {
         }
     }
 
+    /**
+     * Realiza uma verificação detalhada de saúde da aplicação.
+     * @param req Requisição HTTP
+     * @param res Resposta HTTP
+     * @returns Informações detalhadas sobre a saúde da aplicação
+     */
     async detailedCheck(req: Request, res: Response) {
         try {
             const basicInfo = await this.basicCheck(req, res);

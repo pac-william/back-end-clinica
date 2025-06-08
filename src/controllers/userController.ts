@@ -5,7 +5,14 @@ import { QueryParamsBuilder } from '../utils/QueryBuilder';
 
 const userService = new UserService();
 
+// Controller responsável pelas operações relacionadas aos usuários
 class UserController {
+    /**
+     * Lista usuários com filtros e paginação.
+     * @param req Requisição HTTP (deve conter os parâmetros de paginação e filtros)
+     * @param res Resposta HTTP
+     * @returns Lista de usuários
+     */
     getAllUsers: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
             const { page, limit, email, role } = QueryParamsBuilder.from(req.query)
@@ -23,6 +30,12 @@ class UserController {
         }
     };
 
+    /**
+     * Cria um novo usuário.
+     * @param req Requisição HTTP (deve conter os dados do usuário no body)
+     * @param res Resposta HTTP
+     * @returns O usuário criado ou erro de validação
+     */
     createUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         try {
             // Se role não for fornecida, define como 'USER' por padrão
@@ -56,6 +69,12 @@ class UserController {
         }
     };
 
+    /**
+     * Realiza o login de um usuário.
+     * @param req Requisição HTTP (deve conter email e senha no body)
+     * @param res Resposta HTTP
+     * @returns Token de autenticação ou erro de login
+     */
     login: RequestHandler = async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;
         const user = await userService.login({ email, password });

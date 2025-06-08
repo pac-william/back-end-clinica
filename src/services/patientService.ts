@@ -6,6 +6,7 @@ import { ErrorResponse } from '../utils/ErrorResponse';
 
 const patientRepository = new PatientRepository();
 
+// Service responsável pelas operações de negócio relacionadas aos pacientes
 class PatientService {
     async getAllPatients(page: number, size: number, name?: string, email?: string, phone?: string): Promise<PatientPaginatedResponse | ErrorResponse> {
         try {
@@ -15,6 +16,11 @@ class PatientService {
         }
     }
 
+    /**
+     * Busca um paciente pelo id.
+     * @param id Id do paciente
+     * @returns O paciente encontrado ou null
+     */
     async getPatientById(id: string) {
         try {
             const patient = await patientRepository.getPatientById(id);
@@ -29,6 +35,11 @@ class PatientService {
         }
     }
 
+    /**
+     * Cria um novo paciente.
+     * @param patient Dados do paciente
+     * @returns O paciente criado ou erro de validação
+     */
     async createPatient(patient: Patient) {
         try {
             if(!Utils.checkCPF(patient.cpf)) {
@@ -58,6 +69,12 @@ class PatientService {
         }
     }
 
+    /**
+     * Atualiza os dados de um paciente existente.
+     * @param id Id do paciente
+     * @param patient Dados atualizados do paciente
+     * @returns O paciente atualizado
+     */
     async updatePatient(id: string, patient: PatientDTO) {
         try {
             const existingPatient = await patientRepository.getPatientById(id);
@@ -73,6 +90,10 @@ class PatientService {
         }
     }
 
+    /**
+     * Remove um paciente pelo id.
+     * @param id Id do paciente
+     */
     async deletePatient(id: string) {
         try {
             const existingPatient = await patientRepository.getPatientById(id);
@@ -88,6 +109,11 @@ class PatientService {
         }
     }
 
+    /**
+     * Busca um paciente pelo CPF.
+     * @param cpf CPF do paciente
+     * @returns O paciente encontrado ou null
+     */
     async getByCpf(cpf: string) {
         try {
             return await patientRepository.getByCpf(cpf);

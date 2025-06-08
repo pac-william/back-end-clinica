@@ -40,6 +40,13 @@ class MedicalRecordService {
     }
   }
 
+  /**
+   * Lista prontuários médicos de um médico com paginação.
+   * @param doctorId Id do médico
+   * @param page Número da página
+   * @param size Tamanho da página
+   * @returns Lista de prontuários e total
+   */
   async getMedicalRecords(doctorId: string, page: number, size: number) {
     try {
       // Verificar se o médico existe
@@ -54,6 +61,11 @@ class MedicalRecordService {
     }
   }
 
+  /**
+   * Busca um prontuário médico pelo id.
+   * @param id Id do prontuário
+   * @returns O prontuário encontrado ou erro
+   */
   async getMedicalRecordById(id: string) {
     try {
       const record = await medicalRecordRepository.getMedicalRecordById(id);

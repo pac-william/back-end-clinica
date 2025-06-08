@@ -6,6 +6,7 @@ import { ErrorResponse } from '../utils/ErrorResponse';
 const secretaryRepository = new SecretaryRepository();
 const doctorService = new DoctorService();
 
+// Service responsável pelas operações de negócio relacionadas às secretárias
 class SecretaryService {
     async getAllSecretaries(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string) {
         try {
@@ -15,6 +16,11 @@ class SecretaryService {
         }
     }
 
+    /**
+     * Busca uma secretária pelo id.
+     * @param id Id da secretária
+     * @returns A secretária encontrada ou null
+     */
     async getById(id: string) {
         try {
             const secretary = await secretaryRepository.getById(id);
@@ -29,6 +35,11 @@ class SecretaryService {
         }
     }
 
+    /**
+     * Cria uma nova secretária.
+     * @param secretary Dados da secretária
+     * @returns A secretária criada ou erro de validação
+     */
     async create(secretary: Secretary) {
         try {
             const doctor = await doctorService.getDoctorById(String(secretary.doctor_id));
@@ -51,6 +62,14 @@ class SecretaryService {
         }
     }
 
+    /**
+     * Atualiza os dados de uma secretária existente.
+     * @param id Id da secretária
+     * @param name Nome da secretária
+     * @param email Email da secretária
+     * @param phone Telefone da secretária
+     * @returns A secretária atualizada
+     */
     async update(id: string, name: string, email: string, phone: string) {
         try {
             const secretary = await secretaryRepository.getById(id);
@@ -66,6 +85,11 @@ class SecretaryService {
         }
     }
 
+    /**
+     * Remove uma secretária pelo id.
+     * @param id Id da secretária
+     * @returns Resultado da operação
+     */
     async delete(id: string) {
         try {
             const secretary = await secretaryRepository.getById(id);
