@@ -8,7 +8,13 @@ import Utils from '../utils/utils';
 const doctorRepository = new DoctorRepository();
 const specialtyRepository = new SpecialtyRepository();
 
+// Service responsável pelas operações de negócio relacionadas aos médicos
 class DoctorService {
+  /**
+   * Lista médicos com filtros e paginação.
+   * @param filters Filtros de busca (página, tamanho, especialidades, nome)
+   * @returns Lista paginada de médicos ou erro
+   */
   async getAllDoctors(filters: { page: number; size: number; specialty?: number[]; name?: string }): Promise<DoctorPaginatedResponse | ErrorResponse> {
     try {
       const { page, size, specialty, name } = filters;
@@ -19,6 +25,11 @@ class DoctorService {
     }
   }
 
+  /**
+   * Busca um médico pelo id.
+   * @param id Id do médico
+   * @returns O médico encontrado ou erro
+   */
   async getDoctorById(id: string): Promise<DoctorDTO | ErrorResponse> {
     try {
       const doctor = await doctorRepository.getDoctorById(id);
@@ -31,6 +42,11 @@ class DoctorService {
     }
   }
 
+  /**
+   * Cria um novo médico.
+   * @param doctor Dados do médico
+   * @returns O médico criado ou erro
+   */
   async createDoctor(doctor: DoctorDTO): Promise<DoctorDTO | ErrorResponse> {
     try {
       const existing = await doctorRepository.getFirstWhere(doctor.crm, doctor.email);
@@ -59,6 +75,12 @@ class DoctorService {
     }
   }
 
+  /**
+   * Atualiza os dados de um médico existente.
+   * @param id Id do médico
+   * @param doctor Dados atualizados do médico
+   * @returns O médico atualizado ou erro
+   */
   async updateDoctor(id: string, doctor: Partial<DoctorDTO>): Promise<DoctorDTO | ErrorResponse> {
     try {
       if (doctor.specialties) {
@@ -79,6 +101,12 @@ class DoctorService {
     }
   }
 
+  /**
+   * Ativa ou desativa um médico.
+   * @param id Id do médico
+   * @param active Status de ativação
+   * @returns void ou erro
+   */
   async activeDoctor(id: string, active: boolean): Promise<void | ErrorResponse> {
     try {
       await doctorRepository.updateDoctorActive(id, active);
@@ -87,6 +115,11 @@ class DoctorService {
     }
   }
 
+  /**
+   * Remove um médico pelo id.
+   * @param id Id do médico
+   * @returns void ou erro
+   */
   async deleteDoctor(id: string): Promise<void | ErrorResponse> {
     try {
       await doctorRepository.deleteDoctor(id);
