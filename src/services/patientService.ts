@@ -1,81 +1,99 @@
 import Utils from '../utils/utils';
-import db from '../database/connection';
 import { PatientDTO } from '../dtos/patient.dto';
 import { Patient, PatientPaginatedResponse } from '../models/patient';
+import { PatientRepository } from '../repository/patientRepository';
+import { ErrorResponse } from '../utils/ErrorResponse';
+
+const patientRepository = new PatientRepository();
 
 class PatientService {
-    async getAllPatients(page: number, size: number, name?: string, email?: string, phone?: string): Promise<PatientPaginatedResponse> {
-        const offset = (page - 1) * size;
-
-        let query = db('patients');
-
-        if (name) {
-            query = query.whereRaw('LOWER(name) LIKE LOWER(?)', [`%${name}%`]);
+    async getAllPatients(page: number, size: number, name?: string, email?: string, phone?: string): Promise<PatientPaginatedResponse | ErrorResponse> {
+        try {
+            return await patientRepository.getAllPatients(page, size, name, email, phone);
+        } catch (error) {
+            return new ErrorResponse('Erro ao buscar pacientes', 500).log(error as Error);
         }
-
-        if (email) {
-            query = query.whereRaw('LOWER(email) LIKE LOWER(?)', [`%${email}%`]);
-        }
-
-        if (phone) {
-            query = query.where('phone', 'like', `%${phone}%`);
-        }
-
-        const countResult = await query.clone().count('id as count').first();
-        const total = countResult ? Number(countResult.count) : 0;
-
-        const patients = await query.select('*').offset(offset).limit(size);
-
-        return {
-            patients: patients,
-            meta: {
-                total: total,
-                page: page,
-                size: size,
-            }
-        };
     }
 
     async getPatientById(id: string) {
-        const patient = await db('patients').where('id', id).first();
-        return patient;
+        try {
+            const patient = await patientRepository.getPatientById(id);
+            
+            if (!patient) {
+                return new ErrorResponse('Paciente não encontrado', 404);
+            }
+            
+            return patient;
+        } catch (error) {
+            return new ErrorResponse('Erro ao buscar paciente', 500).log(error as Error);
+        }
     }
 
     async createPatient(patient: Patient) {
-        if(!Utils.checkCPF(patient.cpf)) {
-            return {
-                success:false,
-                message: 'Invalid CPF'
+        try {
+            if(!Utils.checkCPF(patient.cpf)) {
+                return {
+                    success: false,
+                    message: 'CPF inválido'
+                };
             }
-        };
 
-        patient.cpf = patient.cpf.length > 11 ? Utils.removeMask(patient.cpf) : patient.cpf;
-        if(await this.getByCpf(patient.cpf)) {
-            return  {
-                message: "Patient with this CPF already exists",
-                success: false
+            patient.cpf = patient.cpf.length > 11 ? Utils.removeMask(patient.cpf) : patient.cpf;
+            
+            const existingPatient = await patientRepository.getByCpf(patient.cpf);
+            if(existingPatient) {
+                return {
+                    message: "Paciente com este CPF já existe",
+                    success: false
+                };
+            }
+
+            const patientResult = await patientRepository.createPatient(patient);
+            return {
+                success: true,
+                data: patientResult
             };
+        } catch (error) {
+            return new ErrorResponse('Erro ao criar paciente', 500).log(error as Error);
         }
-
-        const [patientResult] = await db('patients').insert(patient).returning('*');
-        return {
-            success: true,
-            data: patientResult
-        };
     }
 
     async updatePatient(id: string, patient: PatientDTO) {
-        const [patientResult] = await db('patients').where('id', id).update({ name: patient.name, address: patient.address, phone: patient.phone, cpf: patient.cpf }).returning('*');
-        return patientResult;
+        try {
+            const existingPatient = await patientRepository.getPatientById(id);
+            
+            if (!existingPatient) {
+                return new ErrorResponse('Paciente não encontrado', 404);
+            }
+            
+            const patientResult = await patientRepository.updatePatient(id, patient);
+            return patientResult;
+        } catch (error) {
+            return new ErrorResponse('Erro ao atualizar paciente', 500).log(error as Error);
+        }
     }
 
     async deletePatient(id: string) {
-        await db('patients').where('id', id).delete();
+        try {
+            const existingPatient = await patientRepository.getPatientById(id);
+            
+            if (!existingPatient) {
+                return new ErrorResponse('Paciente não encontrado', 404);
+            }
+            
+            await patientRepository.deletePatient(id);
+            return { success: true, message: 'Paciente removido com sucesso' };
+        } catch (error) {
+            return new ErrorResponse('Erro ao excluir paciente', 500).log(error as Error);
+        }
     }
 
     async getByCpf(cpf: string) {
-        const patient = await db('patients').where('cpf', cpf).first();
-        return patient;
+        try {
+            return await patientRepository.getByCpf(cpf);
+        } catch (error) {
+            return new ErrorResponse('Erro ao buscar paciente por CPF', 500).log(error as Error);
+        }
     }
 }
 

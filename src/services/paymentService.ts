@@ -23,11 +23,11 @@ class PaymentService {
   }) {
     try {
       const { page, size, appointmentId, status, startDate, endDate } = filters;
-      
+
       // Converte datas se fornecidas
       const parsedStartDate = startDate ? new Date(startDate) : undefined;
       const parsedEndDate = endDate ? new Date(endDate) : undefined;
-      
+
       const payments = await paymentRepository.getAllPayments(
         page,
         size,
@@ -36,7 +36,7 @@ class PaymentService {
         parsedStartDate,
         parsedEndDate
       );
-      
+
       return payments;
     } catch (error) {
       return new ErrorResponse('Erro ao buscar pagamentos', 500).log(error as Error);
@@ -50,11 +50,11 @@ class PaymentService {
   async getPaymentById(id: string) {
     try {
       const payment = await paymentRepository.getPaymentById(id);
-      
+
       if (!payment) {
         return new ErrorResponse('Pagamento não encontrado', 404);
       }
-      
+
       return payment;
     } catch (error) {
       return new ErrorResponse('Erro ao buscar pagamento', 500).log(error as Error);
@@ -72,7 +72,7 @@ class PaymentService {
       if (!appointment) {
         return new ErrorResponse('Consulta não encontrada', 404);
       }
-      
+
       const payments = await paymentRepository.getPaymentsByAppointmentId(appointmentId);
       return { payments };
     } catch (error) {

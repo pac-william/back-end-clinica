@@ -1,72 +1,84 @@
-import { Secretary } from 'models/secretary';
-import db from '../database/connection';
+import { Secretary } from '../models/secretary';
 import DoctorService from './doctorService';
+import { SecretaryRepository } from '../repository/secretaryRepository';
+import { ErrorResponse } from '../utils/ErrorResponse';
+
+const secretaryRepository = new SecretaryRepository();
+const doctorService = new DoctorService();
 
 class SecretaryService {
-    async getAllSecretaries(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string): Promise<{ data: Secretary[]; meta: { total: number, page: number, limit: number, totalPages: number } }> {
-        const offset = (page - 1) * limit;
-        
-        let query = db('secretarys');
-        
-        if (name) {
-            query = query.whereRaw('LOWER(name) LIKE LOWER(?)', [`%${name}%`]);
+    async getAllSecretaries(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string) {
+        try {
+            return await secretaryRepository.getAllSecretaries(page, limit, name, email, phone);
+        } catch (error) {
+            return new ErrorResponse('Erro ao buscar secretários', 500).log(error as Error);
         }
-        
-        if (email) {
-            query = query.whereRaw('LOWER(email) LIKE LOWER(?)', [`%${email}%`]);
-        }
-        
-        if (phone) {
-            query = query.where('phone', 'like', `%${phone}%`);
-        }
-
-        const countResult = await query.clone().count('id as count').first();
-        const total = countResult ? Number(countResult.count) : 0;
-        
-        const secretaries = await query.select('*').offset(offset).limit(limit);
-        
-        return {
-            data: secretaries,
-            meta: {
-                total: total,
-                page: page,
-                limit: limit,
-                totalPages: Math.ceil(total / limit)
-            }
-        };
     }
 
     async getById(id: string) {
-        const secretary = await db('secretarys').where('id', id).first();
-        return secretary;
+        try {
+            const secretary = await secretaryRepository.getById(id);
+            
+            if (!secretary) {
+                return new ErrorResponse('Secretário não encontrado', 404);
+            }
+            
+            return secretary;
+        } catch (error) {
+            return new ErrorResponse('Erro ao buscar secretário', 500).log(error as Error);
+        }
     }
 
     async create(secretary: Secretary) {
-        const doctorService = new DoctorService();
-        const doctor = await doctorService.getDoctorById(String(secretary.doctor_id));
+        try {
+            const doctor = await doctorService.getDoctorById(String(secretary.doctor_id));
 
-        if (!doctor) {
+            if (!doctor || doctor instanceof ErrorResponse) {
+                return {
+                    message: "Médico não encontrado",
+                    success: false
+                };
+            }
+
+            const secretarySaved = await secretaryRepository.create(secretary);
+            
             return {
-                message: "Doctor not found",
-                success: false
+                success: true,
+                data: secretarySaved
             };
+        } catch (error) {
+            return new ErrorResponse('Erro ao criar secretário', 500).log(error as Error);
         }
-
-        const [secretarySaved] = await db('secretarys').insert(secretary).returning('*');
-        return {
-            success: true,
-            data: secretarySaved
-        };
     }
 
     async update(id: string, name: string, email: string, phone: string) {
-        const secretary = await db('secretarys').where('id', id).update({ name, email, phone });
-        return secretary;
+        try {
+            const secretary = await secretaryRepository.getById(id);
+            
+            if (!secretary) {
+                return new ErrorResponse('Secretário não encontrado', 404);
+            }
+            
+            const updatedSecretary = await secretaryRepository.update(id, name, email, phone);
+            return updatedSecretary;
+        } catch (error) {
+            return new ErrorResponse('Erro ao atualizar secretário', 500).log(error as Error);
+        }
     }
 
     async delete(id: string) {
-        const secretary = await db('secretarys').where('id', id).delete();
-        return secretary;
+        try {
+            const secretary = await secretaryRepository.getById(id);
+            
+            if (!secretary) {
+                return new ErrorResponse('Secretário não encontrado', 404);
+            }
+            
+            await secretaryRepository.delete(id);
+            return { success: true, message: 'Secretário removido com sucesso' };
+        } catch (error) {
+            return new ErrorResponse('Erro ao excluir secretário', 500).log(error as Error);
+        }
     }
 }
 

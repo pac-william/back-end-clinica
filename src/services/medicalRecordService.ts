@@ -1,95 +1,86 @@
-
-import db from '../database/connection';
-import { Doctor } from '../models/doctor';
+import { MedicalRecordRepository } from '../repository/medicalRecordRepository';
+import { ErrorResponse } from '../utils/ErrorResponse';
 import DoctorService from './doctorService';
 import PatientService from './patientService';
 
-class MedicalRecordService {
-  async newMedicalRecord(id: string, patientId: string, description: string) {
-    const trx = await db.transaction();
+const medicalRecordRepository = new MedicalRecordRepository();
+const doctorService = new DoctorService();
+const patientService = new PatientService();
 
-    const doctorService = new DoctorService();
-    const doctor: Doctor = await doctorService.getDoctorById(id);
-    if (!doctor) {
+class MedicalRecordService {
+  async newMedicalRecord(doctorId: string, patientId: string, description: string) {
+    try {
+      // Verificar se o médico existe
+      const doctor = await doctorService.getDoctorById(doctorId);
+      if (!doctor || doctor instanceof ErrorResponse) {
         return {
           success: false,
-          message: 'Doctor not found'
+          message: 'Médico não encontrado'
         };
-    }
+      }
 
-    const patientService = new PatientService();
-    const patient = await patientService.getPatientById(patientId);
-
-    if (!patient) {
-      return {
-        success: false,
-        message: 'Patient not found'
-      };
-    }
-    
-    try {
-      const [record] = await trx('medical_record')
-        .insert({
-          doctor_id: id,
-          patient_id: patientId,
-          description: description
-        })
-        .returning('*');
-
-      await trx.commit();
+      // Verificar se o paciente existe
+      const patient = await patientService.getPatientById(patientId);
+      if (!patient || patient instanceof ErrorResponse) {
+        return {
+          success: false,
+          message: 'Paciente não encontrado'
+        };
+      }
+      
+      // Criar o registro médico
+      const record = await medicalRecordRepository.createMedicalRecord(doctorId, patientId, description);
+      
       return {
         success: true,
         data: record
       };
     } catch (error) {
-      await trx.rollback();
-      throw error;
+      return new ErrorResponse('Erro ao criar registro médico', 500).log(error as Error);
     }
   }
 
   async getMedicalRecords(doctorId: string, page: number, size: number) {
-    const trx = await db.transaction();
-
     try {
-      const [totalResult] = await trx('medical_record')
-        .where('doctor_id', doctorId)
-        .count({ count: '*' });
-
-      const total = Number(totalResult.count);
-
-      const records = await trx('medical_record')
-        .where('doctor_id', doctorId)
-        .limit(size)
-        .select('*');
-
-      await trx.commit();
-
-      return {
-        data: records,
-        total,
-      };
+      // Verificar se o médico existe
+      const doctor = await doctorService.getDoctorById(doctorId);
+      if (!doctor || doctor instanceof ErrorResponse) {
+        return new ErrorResponse('Médico não encontrado', 404);
+      }
+      
+      return await medicalRecordRepository.getMedicalRecords(doctorId, page, size);
     } catch (error) {
-      await trx.rollback();
-      throw error;
+      return new ErrorResponse('Erro ao buscar registros médicos', 500).log(error as Error);
     }
   }
 
   async getMedicalRecordById(id: string) {
-    const trx = await db.transaction();
-
     try {
-      const record = await trx('medical_record')
-        .where('id', id)
-        .first();
-
-      await trx.commit();
+      const record = await medicalRecordRepository.getMedicalRecordById(id);
+      
+      if (!record) {
+        return new ErrorResponse('Registro médico não encontrado', 404);
+      }
+      
       return record;
     } catch (error) {
-      await trx.rollback();
-      throw error;
+      return new ErrorResponse('Erro ao buscar registro médico', 500).log(error as Error);
     }
   }
 
+  async getPatientMedicalRecords(patientId: string, page: number, size: number) {
+    try {
+      // Verificar se o paciente existe
+      const patient = await patientService.getPatientById(patientId);
+      if (!patient || patient instanceof ErrorResponse) {
+        return new ErrorResponse('Paciente não encontrado', 404);
+      }
+      
+      return await medicalRecordRepository.getPatientMedicalRecords(patientId, page, size);
+    } catch (error) {
+      return new ErrorResponse('Erro ao buscar registros médicos do paciente', 500).log(error as Error);
+    }
+  }
 }
 
 export default MedicalRecordService;
