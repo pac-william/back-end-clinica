@@ -1,10 +1,17 @@
-
 import db from '../database/connection';
 import { Doctor } from '../models/doctor';
 import DoctorService from './doctorService';
 import PatientService from './patientService';
 
+// Service responsável pelas operações de negócio relacionadas aos prontuários médicos
 class MedicalRecordService {
+  /**
+   * Cria um novo prontuário médico.
+   * @param id Id do médico
+   * @param patientId Id do paciente
+   * @param description Descrição do prontuário
+   * @returns O prontuário criado ou erro
+   */
   async newMedicalRecord(id: string, patientId: string, description: string) {
     const trx = await db.transaction();
 
@@ -47,6 +54,13 @@ class MedicalRecordService {
     }
   }
 
+  /**
+   * Lista prontuários médicos de um médico com paginação.
+   * @param doctorId Id do médico
+   * @param page Número da página
+   * @param size Tamanho da página
+   * @returns Lista de prontuários e total
+   */
   async getMedicalRecords(doctorId: string, page: number, size: number) {
     const trx = await db.transaction();
 
@@ -74,6 +88,11 @@ class MedicalRecordService {
     }
   }
 
+  /**
+   * Busca um prontuário médico pelo id.
+   * @param id Id do prontuário
+   * @returns O prontuário encontrado ou erro
+   */
   async getMedicalRecordById(id: string) {
     const trx = await db.transaction();
 
