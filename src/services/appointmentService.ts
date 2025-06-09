@@ -1,4 +1,5 @@
 import { AppointmentDTO } from '../dtos/appointment.dto';
+import { AppointmentStatus } from '../enums/AppointmentStatus';
 import { AppointmentRepository } from '../repository/appointmentRepository';
 import { DoctorRepository } from '../repository/doctorRepository';
 import { PatientRepository } from '../repository/patientRepository';
@@ -151,8 +152,8 @@ class AppointmentService {
       }
 
       // Validar o status
-      const validStatuses = ['AGENDADO', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO'];
-      if (!validStatuses.includes(status)) {
+      const validStatuses = Object.values(AppointmentStatus);
+      if (!validStatuses.includes(status as AppointmentStatus)) {
         return new ErrorResponse('Status inválido', 400);
       }
 

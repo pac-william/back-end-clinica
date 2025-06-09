@@ -6,6 +6,7 @@ export const secretaryDTO = z.object({
   }),
   department: z.string().min(1, 'Departamento é obrigatório').nullable().optional(),
   phone: z.string().regex(/^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/, 'Telefone inválido').nullable().optional(),
-  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF inválido').nullable().optional(),
-  doctor_id: z.number()
+  email: z.string().email('Email inválido').nullable().optional(),
+  user_id: z.number().optional(),
+  active: z.boolean().optional()
 });

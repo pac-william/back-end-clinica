@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('crm').notNullable().unique();
     table.string('phone', 15);
     table.string('email').unique();
+    table.boolean('active').defaultTo(true);
     table.integer('user_id').unsigned().unique();
     table.foreign('user_id').references('id').inTable('users').onDelete('CASCADE');
     table.timestamps(true, true);

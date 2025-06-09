@@ -1,6 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
 import { AppointmentDTO } from '../dtos/appointment.dto';
+import { AppointmentStatus } from '../enums/AppointmentStatus';
 import AppointmentService from '../services/appointmentService';
 import { ErrorResponse } from '../utils/ErrorResponse';
 import { QueryParamsBuilder } from '../utils/QueryBuilder';
@@ -129,6 +130,16 @@ class AppointmentController {
 
       if (!status) {
         res.status(400).json({ message: 'Status não fornecido' });
+        return;
+      }
+
+      // Validar se o status fornecido é válido
+      const validStatuses = Object.values(AppointmentStatus);
+      if (!validStatuses.includes(status as AppointmentStatus)) {
+        res.status(400).json({ 
+          message: 'Status inválido', 
+          validStatuses: validStatuses 
+        });
         return;
       }
 

@@ -8,7 +8,8 @@ export async function up(knex: Knex): Promise<void> {
     table.enu('role', ['USER', 'ADMIN', 'MASTER'], {
       useNative: true,
       enumName: 'user_role'
-    }).notNullable();
+    }).notNullable().defaultTo('USER');
+    table.boolean('active').defaultTo(true);
     table.timestamps(true, true);
   });
 }

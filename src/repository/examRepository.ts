@@ -1,5 +1,6 @@
 import db from "../database/connection";
 import { ExamDTO } from "../dtos/exam.dto";
+import { ExamStatus } from "../enums/ExamStatus";
 import { MetaBuilder } from "../utils/MetaBuilder";
 
 export class ExamRepository {
@@ -10,7 +11,6 @@ export class ExamRepository {
    * @param patientId Filtro por ID de paciente
    * @param doctorId Filtro por ID de médico
    * @param status Filtro por status
-   * @param type Filtro por tipo de exame
    * @param startDate Data inicial para filtro
    * @param endDate Data final para filtro
    */
@@ -20,59 +20,78 @@ export class ExamRepository {
     patientId?: number,
     doctorId?: number,
     status?: string,
-    type?: string,
     startDate?: Date,
     endDate?: Date
   ) {
     const offset = (page - 1) * size;
-    let query = db('exams');
-
+    
+    // Primeiro, obtemos os appointments relacionados aos filtros
+    let appointmentQuery = db('appointments');
+    
     if (patientId) {
-      query = query.where('patient_id', patientId);
+      appointmentQuery = appointmentQuery.where('patient_id', patientId);
     }
 
     if (doctorId) {
-      query = query.where('doctor_id', doctorId);
+      appointmentQuery = appointmentQuery.where('doctor_id', doctorId);
     }
-
+    
+    if (startDate && endDate) {
+      appointmentQuery = appointmentQuery.whereBetween('date', [startDate, endDate]);
+    } else if (startDate) {
+      appointmentQuery = appointmentQuery.where('date', '>=', startDate);
+    } else if (endDate) {
+      appointmentQuery = appointmentQuery.where('date', '<=', endDate);
+    }
+    
+    const appointmentIds = await appointmentQuery.pluck('id');
+    
+    // Agora consultamos os exames relacionados a esses appointments
+    let query = db('appointment_exams')
+      .whereIn('appointment_id', appointmentIds);
+    
     if (status) {
       query = query.where('status', status);
     }
-
-    if (type) {
-      query = query.whereRaw('LOWER(type) LIKE LOWER(?)', [`%${type}%`]);
-    }
-
-    if (startDate && endDate) {
-      query = query.whereBetween('date', [startDate, endDate]);
-    } else if (startDate) {
-      query = query.where('date', '>=', startDate);
-    } else if (endDate) {
-      query = query.where('date', '<=', endDate);
-    }
-
+    
     const countResult = await query.clone().count('id as count').first();
     const total = countResult ? Number(countResult.count) : 0;
-
-    const exams = await query.offset(offset).limit(size);
-
-    // Carrega informações adicionais
-    const patientIds = [...new Set(exams.map(e => e.patient_id))];
-    const doctorIds = [...new Set(exams.map(e => e.doctor_id))];
-
-    const patients = await db('patients')
-      .whereIn('id', patientIds)
-      .select('id', 'name');
-
-    const doctors = await db('doctors')
-      .whereIn('id', doctorIds)
-      .select('id', 'name');
-
+    
+    const exams = await query
+      .join('exams', 'appointment_exams.exam_id', 'exams.id')
+      .join('appointments', 'appointment_exams.appointment_id', 'appointments.id')
+      .join('patients', 'appointments.patient_id', 'patients.id')
+      .join('doctors', 'appointments.doctor_id', 'doctors.id')
+      .select(
+        'appointment_exams.*',
+        'exams.name as exam_name',
+        'exams.description as exam_description',
+        'exams.price as exam_price',
+        'patients.id as patient_id',
+        'patients.name as patient_name',
+        'doctors.id as doctor_id',
+        'doctors.name as doctor_name'
+      )
+      .offset(offset)
+      .limit(size);
+    
     return {
       exams: exams.map(exam => ({
-        ...exam,
-        patient: patients.find(p => p.id === exam.patient_id) || null,
-        doctor: doctors.find(d => d.id === exam.doctor_id) || null
+        id: exam.id,
+        appointmentId: exam.appointment_id,
+        examId: exam.exam_id,
+        examName: exam.exam_name,
+        examDescription: exam.exam_description,
+        examPrice: exam.exam_price,
+        scheduledDate: exam.scheduled_date,
+        resultDate: exam.result_date,
+        status: exam.status,
+        result: exam.result,
+        notes: exam.notes,
+        patient: { id: exam.patient_id, name: exam.patient_name },
+        doctor: { id: exam.doctor_id, name: exam.doctor_name },
+        createdAt: exam.created_at,
+        updatedAt: exam.updated_at
       })),
       meta: new MetaBuilder(total, page, size).build()
     };
@@ -80,23 +99,47 @@ export class ExamRepository {
 
   /**
    * Busca um exame pelo seu ID.
-   * @param id ID do exame
+   * @param id ID do exame (da tabela appointment_exams)
    */
   async getExamById(id: string) {
-    const exam = await db('exams').where('id', id).first();
+    const exam = await db('appointment_exams')
+      .where('appointment_exams.id', id)
+      .join('exams', 'appointment_exams.exam_id', 'exams.id')
+      .join('appointments', 'appointment_exams.appointment_id', 'appointments.id')
+      .join('patients', 'appointments.patient_id', 'patients.id')
+      .join('doctors', 'appointments.doctor_id', 'doctors.id')
+      .select(
+        'appointment_exams.*',
+        'exams.name as exam_name',
+        'exams.description as exam_description',
+        'exams.price as exam_price',
+        'patients.id as patient_id',
+        'patients.name as patient_name',
+        'doctors.id as doctor_id',
+        'doctors.name as doctor_name'
+      )
+      .first();
     
     if (!exam) {
       return null;
     }
 
-    // Busca informações do paciente e médico relacionados
-    const patient = await db('patients').where('id', exam.patient_id).first();
-    const doctor = await db('doctors').where('id', exam.doctor_id).first();
-
     return {
-      ...exam,
-      patient: patient ? { id: patient.id, name: patient.name } : null,
-      doctor: doctor ? { id: doctor.id, name: doctor.name } : null
+      id: exam.id,
+      appointmentId: exam.appointment_id,
+      examId: exam.exam_id,
+      examName: exam.exam_name,
+      examDescription: exam.exam_description,
+      examPrice: exam.exam_price,
+      scheduledDate: exam.scheduled_date,
+      resultDate: exam.result_date,
+      status: exam.status,
+      result: exam.result,
+      notes: exam.notes,
+      patient: { id: exam.patient_id, name: exam.patient_name },
+      doctor: { id: exam.doctor_id, name: exam.doctor_name },
+      createdAt: exam.created_at,
+      updatedAt: exam.updated_at
     };
   }
 
@@ -105,21 +148,29 @@ export class ExamRepository {
    * @param patientId ID do paciente
    */
   async getExamsByPatientId(patientId: number) {
-    return db('exams').where('patient_id', patientId);
+    const appointmentIds = await db('appointments')
+      .where('patient_id', patientId)
+      .pluck('id');
+    
+    return db('appointment_exams')
+      .whereIn('appointment_id', appointmentIds)
+      .join('exams', 'appointment_exams.exam_id', 'exams.id')
+      .select('appointment_exams.*', 'exams.name as exam_name');
   }
 
   /**
-   * Cria um novo exame.
+   * Cria um novo exame para uma consulta.
    * @param exam Dados do exame
    */
   async createExam(exam: ExamDTO) {
-    const [result] = await db('exams').insert({
-      patient_id: exam.patientId,
-      doctor_id: exam.doctorId,
-      type: exam.type,
-      date: exam.date,
-      result: exam.result || '',
-      status: exam.status
+    const [result] = await db('appointment_exams').insert({
+      appointment_id: exam.appointmentId,
+      exam_id: exam.examId,
+      scheduled_date: exam.scheduledDate,
+      result_date: exam.resultDate,
+      status: exam.status,
+      result: exam.result,
+      notes: exam.notes
     }).returning('*');
 
     return result;
@@ -131,15 +182,16 @@ export class ExamRepository {
    * @param exam Dados atualizados
    */
   async updateExam(id: string, exam: Partial<ExamDTO>) {
-    const [result] = await db('exams')
+    const [result] = await db('appointment_exams')
       .where('id', id)
       .update({
-        ...(exam.patientId && { patient_id: exam.patientId }),
-        ...(exam.doctorId && { doctor_id: exam.doctorId }),
-        ...(exam.type && { type: exam.type }),
-        ...(exam.date && { date: exam.date }),
+        ...(exam.appointmentId && { appointment_id: exam.appointmentId }),
+        ...(exam.examId && { exam_id: exam.examId }),
+        ...(exam.scheduledDate && { scheduled_date: exam.scheduledDate }),
+        ...(exam.resultDate && { result_date: exam.resultDate }),
+        ...(exam.status && { status: exam.status }),
         ...(exam.result !== undefined && { result: exam.result }),
-        ...(exam.status && { status: exam.status })
+        ...(exam.notes !== undefined && { notes: exam.notes })
       })
       .returning('*');
 
@@ -152,7 +204,7 @@ export class ExamRepository {
    * @param status Novo status
    */
   async updateExamStatus(id: string, status: string) {
-    const [result] = await db('exams')
+    const [result] = await db('appointment_exams')
       .where('id', id)
       .update({ status })
       .returning('*');
@@ -166,11 +218,12 @@ export class ExamRepository {
    * @param result Resultado do exame
    */
   async updateExamResult(id: string, result: string) {
-    const [updated] = await db('exams')
+    const [updated] = await db('appointment_exams')
       .where('id', id)
       .update({ 
         result,
-        status: 'CONCLUIDO'
+        status: ExamStatus.COMPLETED,
+        result_date: new Date()
       })
       .returning('*');
 
@@ -178,12 +231,12 @@ export class ExamRepository {
   }
 
   /**
-   * Remove um exame (soft delete marcando como CANCELADO).
+   * Remove um exame (soft delete marcando como CANCELED).
    * @param id ID do exame
    */
   async deleteExam(id: string) {
-    return db('exams')
+    return db('appointment_exams')
       .where('id', id)
-      .update({ status: 'CANCELADO' });
+      .update({ status: ExamStatus.CANCELED });
   }
 } 

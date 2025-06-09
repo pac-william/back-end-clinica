@@ -1,0 +1,6 @@
+export enum ExamStatus {
+    REQUESTED = 'REQUESTED',
+    SCHEDULED = 'SCHEDULED',
+    COMPLETED = 'COMPLETED',
+    CANCELED = 'CANCELED'
+} 

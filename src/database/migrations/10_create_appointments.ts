@@ -5,8 +5,8 @@ export async function up(knex: Knex): Promise<void> {
     table.increments('id').primary();
     table.integer('patient_id').unsigned().notNullable();
     table.integer('doctor_id').unsigned().notNullable();
-    table.datetime('appointment_date').notNullable();
-    table.string('status').defaultTo('agendada');
+    table.datetime('date').notNullable();
+    table.enum('status', ['SCHEDULED', 'CONFIRMED', 'CANCELED', 'COMPLETED']).defaultTo('SCHEDULED');
     table.text('notes');
     table.foreign('patient_id').references('id').inTable('patients').onDelete('CASCADE');
     table.foreign('doctor_id').references('id').inTable('doctors').onDelete('CASCADE');

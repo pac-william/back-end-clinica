@@ -1,5 +1,6 @@
 import db from "../database/connection";
 import { AppointmentDTO } from "../dtos/appointment.dto";
+import { AppointmentStatus } from "../enums/AppointmentStatus";
 import { MetaBuilder } from "../utils/MetaBuilder";
 
 export class AppointmentRepository {
@@ -88,7 +89,7 @@ export class AppointmentRepository {
     const query = db('appointments')
       .where('doctor_id', doctorId)
       .where('date', date)
-      .whereNot('status', 'CANCELADO');
+      .whereNot('status', AppointmentStatus.CANCELED);
 
     if (appointmentId) {
       query.whereNot('id', appointmentId);
@@ -153,6 +154,6 @@ export class AppointmentRepository {
   async deleteAppointment(id: string) {
     return db('appointments')
       .where('id', id)
-      .update({ status: 'CANCELADO' });
+      .update({ status: AppointmentStatus.CANCELED });
   }
 } 
