@@ -6,7 +6,13 @@ import { ErrorResponse } from '../utils/ErrorResponse';
 
 const specialtyRepository = new SpecialtyRepository();
 
+// Service responsável pelas operações de negócio relacionadas às especialidades
 class SpecialtyService {
+  /**
+   * Cria uma nova especialidade.
+   * @param name Nome da especialidade
+   * @returns A especialidade criada ou erro de validação
+   */
   async createSpecialty({ name }: z.infer<typeof SpecialtyDTO>): Promise<any> {
     try {
       // Verificar se já existe uma especialidade com o mesmo nome
@@ -35,6 +41,13 @@ class SpecialtyService {
     }
   }
 
+  /**
+   * Lista especialidades com filtros e paginação.
+   * @param page Número da página
+   * @param limit Tamanho da página
+   * @param name Nome da especialidade (opcional)
+   * @returns Lista paginada de especialidades
+   */
   async getAllSpecialties(page: number = 1, limit: number = 10, name?: string) {
     try {
       return await specialtyRepository.getAllSpecialties(page, limit, name);
@@ -43,6 +56,11 @@ class SpecialtyService {
     }
   }
 
+  /**
+   * Busca uma especialidade pelo id.
+   * @param id Id da especialidade
+   * @returns A especialidade encontrada ou erro
+   */
   async getSpecialtyById(id: number) {
     try {
       const specialty = await specialtyRepository.getSpecialtyById(id);
@@ -57,6 +75,12 @@ class SpecialtyService {
     }
   }
 
+  /**
+   * Atualiza os dados de uma especialidade existente.
+   * @param id Id da especialidade
+   * @param name Nome atualizado da especialidade
+   * @returns A especialidade atualizada ou erro
+   */
   async updateSpecialty(id: number, { name }: { name: string }) {
     try {
       const specialty = await specialtyRepository.getSpecialtyById(id);
@@ -75,6 +99,11 @@ class SpecialtyService {
     }
   }
 
+  /**
+   * Remove uma especialidade pelo id.
+   * @param id Id da especialidade
+   * @returns Resultado da operação ou erro
+   */
   async deleteSpecialty(id: number) {
     try {
       const specialty = await specialtyRepository.getSpecialtyById(id);

@@ -1,3 +1,4 @@
+// Configuração principal da aplicação Express
 import dotenv from 'dotenv';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
@@ -6,7 +7,10 @@ import healthRouter from './router/healthRouter';
 import routes from './router/index';
 import swaggerSpec from './swagger';
 
+// Carrega variáveis de ambiente
 dotenv.config();
+
+// Inicializa a aplicação Express
 const app = express();
 
 // Middleware para parsing de JSON

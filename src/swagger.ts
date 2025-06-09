@@ -1,5 +1,6 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
+// Configuração do Swagger para documentação da API
 const options: swaggerJSDoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -29,6 +30,7 @@ const options: swaggerJSDoc.Options = {
       },
     ],
   },
+  // Arquivos que contêm as anotações do Swagger
   apis: ['./src/router/*.ts', './src/docs/*.yaml'],
 };
 
