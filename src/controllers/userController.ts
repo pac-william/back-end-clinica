@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
 import { userDTO } from '../dtos/user.dto';
 import UserService from '../services/userService';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const userService = new UserService();
 

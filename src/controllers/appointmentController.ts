@@ -4,7 +4,7 @@ import { AppointmentDTO } from '../dtos/appointment.dto';
 import { AppointmentStatus } from '../enums/AppointmentStatus';
 import AppointmentService from '../services/appointmentService';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const appointmentService = new AppointmentService();
 

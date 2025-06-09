@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 import { PaymentDTO } from '../dtos/payment.dto';
 import PaymentService from '../services/paymentService';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const paymentService = new PaymentService();
 

@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 import { DoctorDTO } from '../dtos/doctor.dto';
 import DoctorService from '../services/doctorService';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const doctorService = new DoctorService();
 

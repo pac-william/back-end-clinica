@@ -4,7 +4,7 @@ import { ZodError } from 'zod';
 import { secretaryDTO } from '../dtos/secretary.dto';
 import SecretaryService from '../services/secretarysService';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const secretaryService = new SecretaryService();
 

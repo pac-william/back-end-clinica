@@ -2,7 +2,7 @@ import { Request, RequestHandler, Response } from 'express';
 import { ZodError } from 'zod';
 import { patientDTO } from '../dtos/patient.dto';
 import PatientService from '../services/patientService';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const patientService = new PatientService();
 

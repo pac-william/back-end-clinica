@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 import { ExamDTO } from '../dtos/exam.dto';
 import ExamService from '../services/examService';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const examService = new ExamService();
 

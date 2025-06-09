@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 import { InsuranceDTO } from '../dtos/insurance.dto';
 import InsuranceService from '../services/insuranceService';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const insuranceService = new InsuranceService();
 

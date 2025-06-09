@@ -1,7 +1,7 @@
 import { log } from 'console';
 import { Request, RequestHandler, Response } from 'express';
 import MedicalRecordService from '../services/medicalRecordService';
-import { QueryParamsBuilder } from '../utils/QueryBuilder';
+import { QueryParamsBuilder } from '../utils/QueryParamsBuilder';
 
 const medicalRecordService = new MedicalRecordService();
 
