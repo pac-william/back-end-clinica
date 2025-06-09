@@ -32,7 +32,7 @@ const appointmentController = new AppointmentController();
  *           description: Data e hora da consulta
  *         status:
  *           type: string
- *           enum: [AGENDADO, CONFIRMADO, CANCELADO, CONCLUIDO]
+ *           enum: [SCHEDULED, CONFIRMED, CANCELLED, COMPLETED]
  *           description: Status da consulta
  */
 
@@ -69,7 +69,7 @@ const appointmentController = new AppointmentController();
  *         name: status
  *         schema:
  *           type: string
- *           enum: [AGENDADO, CONFIRMADO, CANCELADO, CONCLUIDO]
+ *           enum: [SCHEDULED, CONFIRMED, CANCELLED, COMPLETED]
  *         description: Filtrar consultas por status
  *       - in: query
  *         name: startDate
@@ -159,8 +159,8 @@ router.get('/:id', checkRole([UserRole.USER, UserRole.ADMIN, UserRole.MASTER]), 
  *                 example: "2023-12-01T10:30:00Z"
  *               status:
  *                 type: string
- *                 enum: [AGENDADO, CONFIRMADO, CANCELADO, CONCLUIDO]
- *                 example: "AGENDADO"
+ *                 enum: [SCHEDULED, CONFIRMED, CANCELLED, COMPLETED]
+ *                 example: "SCHEDULED"
  *             required:
  *               - patientId
  *               - doctorId
@@ -205,7 +205,7 @@ router.post('/', checkRole([UserRole.ADMIN, UserRole.MASTER]), appointmentContro
  *                 format: date-time
  *               status:
  *                 type: string
- *                 enum: [AGENDADO, CONFIRMADO, CANCELADO, CONCLUIDO]
+ *                 enum: [SCHEDULED, CONFIRMED, CANCELLED, COMPLETED]
  *     responses:
  *       200:
  *         description: Consulta atualizada com sucesso
@@ -237,7 +237,7 @@ router.patch('/:id', checkRole([UserRole.ADMIN, UserRole.MASTER]), appointmentCo
  *         name: status
  *         schema:
  *           type: string
- *           enum: [AGENDADO, CONFIRMADO, CANCELADO, CONCLUIDO]
+ *           enum: [SCHEDULED, CONFIRMED, CANCELLED, COMPLETED]
  *         required: true
  *         description: Novo status da consulta
  *     responses:

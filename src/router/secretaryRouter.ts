@@ -79,8 +79,81 @@ const secretaryController = new SecretaryController();
  */
 router.get('/', secretaryController.getAll);
 router.post('/', secretaryController.create);
-/* 
-router.put('/:id', secretaryController.updatesecretary);
-router.delete('/:id', secretaryController.deletesecretary); */
+
+/**
+ * @swagger
+ * /api/v1/secretaries/{id}:
+ *   get:
+ *     summary: Busca uma secretária pelo ID
+ *     tags: [Secretarias]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da secretária
+ *     responses:
+ *       200:
+ *         description: Secretária encontrada
+ *       404:
+ *         description: Secretária não encontrada
+ */
+router.get('/:id', secretaryController.getById);
+
+/**
+ * @swagger
+ * /api/v1/secretaries/{id}:
+ *   put:
+ *     summary: Atualiza os dados de uma secretária
+ *     tags: [Secretarias]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da secretária
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Secretária atualizada com sucesso
+ *       404:
+ *         description: Secretária não encontrada
+ */
+router.put('/:id', secretaryController.update);
+
+/**
+ * @swagger
+ * /api/v1/secretaries/{id}:
+ *   delete:
+ *     summary: Remove uma secretária
+ *     tags: [Secretarias]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da secretária
+ *     responses:
+ *       200:
+ *         description: Secretária removida com sucesso
+ *       404:
+ *         description: Secretária não encontrada
+ */
+router.delete('/:id', secretaryController.delete);
 
 export default router;

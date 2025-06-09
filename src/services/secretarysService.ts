@@ -1,16 +1,16 @@
 import { Secretary } from '../models/secretary';
-import DoctorService from './doctorService';
 import { SecretaryRepository } from '../repository/secretaryRepository';
 import { ErrorResponse } from '../utils/ErrorResponse';
+import DoctorService from './doctorService';
 
 const secretaryRepository = new SecretaryRepository();
 const doctorService = new DoctorService();
 
 // Service responsável pelas operações de negócio relacionadas às secretárias
 class SecretaryService {
-    async getAllSecretaries(page: number = 1, limit: number = 10, name?: string, email?: string, phone?: string) {
+    async getAllSecretaries(page: number = 1, size: number = 10, name?: string, email?: string, phone?: string) {
         try {
-            return await secretaryRepository.getAllSecretaries(page, limit, name, email, phone);
+            return await secretaryRepository.getAllSecretaries(page, size, name, email, phone);
         } catch (error) {
             return new ErrorResponse('Erro ao buscar secretários', 500).log(error as Error);
         }
@@ -42,7 +42,7 @@ class SecretaryService {
      */
     async create(secretary: Secretary) {
         try {
-            const doctor = await doctorService.getDoctorById(String(secretary.doctor_id));
+            const doctor = await doctorService.getDoctorById(String(secretary.user_id));
 
             if (!doctor || doctor instanceof ErrorResponse) {
                 return {
